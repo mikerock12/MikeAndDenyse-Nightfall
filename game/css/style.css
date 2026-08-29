@@ -1,0 +1,234 @@
+:root {
+  --bg: #07040c;
+  --blood: #8b1e2d;
+  --gold: #d4b46a;
+  --violet: #7b4dff;
+  --ink: #140c18;
+  --paper: #f0e2c8;
+  --danger: #ff4d4d;
+  --ok: #7dffb3;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  color: var(--paper);
+  font-family: "Cinzel", "Palatino Linotype", Palatino, "Times New Roman", serif;
+  user-select: none;
+  touch-action: none;
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #1a0c18 0%, #000 70%);
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  image-rendering: auto;
+}
+
+#overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+#overlay .panel {
+  pointer-events: auto;
+  width: min(920px, 94vw);
+  max-height: 92vh;
+  overflow: auto;
+  padding: 28px 32px 24px;
+  background:
+    linear-gradient(180deg, rgba(18,8,16,0.92), rgba(8,4,10,0.96));
+  border: 2px solid rgba(212,180,106,0.55);
+  box-shadow:
+    0 0 0 1px #2a1018 inset,
+    0 20px 80px rgba(0,0,0,0.65),
+    0 0 60px rgba(139,30,45,0.18);
+}
+
+#overlay.hidden, .hidden { display: none !important; }
+
+#screen-title.panel {
+  background:
+    linear-gradient(180deg, rgba(8,4,10,0.78), rgba(8,4,10,0.92)),
+    url("../assets/worlds/forest_bg.png") center/cover no-repeat;
+}
+
+h1 {
+  font-size: clamp(28px, 5vw, 54px);
+  letter-spacing: 0.12em;
+  text-align: center;
+  color: var(--gold);
+  text-shadow: 0 0 18px rgba(139,30,45,0.7), 0 3px 0 #2a0a10;
+}
+
+h2 {
+  font-size: clamp(18px, 3vw, 28px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #c9b48a;
+  margin: 6px 0 18px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #b89aa8;
+  letter-spacing: 0.22em;
+  font-size: 12px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.story {
+  max-width: 68ch;
+  margin: 0 auto 20px;
+  line-height: 1.65;
+  color: #d8c8be;
+  text-align: center;
+  font-size: 15px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid #d4b46a;
+  background: linear-gradient(180deg, #3a1822, #1a0a10);
+  color: #f3e2c0;
+  font-family: inherit;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 13px;
+  padding: 12px 22px;
+  cursor: pointer;
+  min-width: 180px;
+}
+.btn:hover, .btn:focus { background: linear-gradient(180deg, #5a2030, #2a1018); color: #fff6dc; }
+.btn.ghost { background: transparent; }
+.btn.danger { border-color: #ff6b6b; }
+
+.hero-card {
+  width: min(360px, 90vw);
+  padding: 14px;
+  border: 1px solid rgba(212,180,106,0.4);
+  background: rgba(0,0,0,0.35);
+  cursor: pointer;
+  text-align: center;
+}
+.hero-card.selected { border-color: #ffe09a; box-shadow: 0 0 24px rgba(212,180,106,0.25); }
+.hero-card img {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  image-rendering: auto;
+}
+.hero-card h3 { color: var(--gold); letter-spacing: 0.2em; margin: 8px 0 4px; }
+.hero-card p { color: #b9a8b0; font-size: 13px; line-height: 1.45; }
+
+.hud-note {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: rgba(240,226,200,0.55);
+  pointer-events: none;
+}
+
+#touch {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+}
+body.touch-on #touch { display: block; }
+
+.pad, .act {
+  position: absolute;
+  pointer-events: auto;
+  opacity: 0.55;
+}
+.pad {
+  left: 18px;
+  bottom: 18px;
+  width: 168px;
+  height: 168px;
+}
+.pad button, .act button {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,230,180,0.4);
+  background: rgba(20,8,16,0.55);
+  color: #f0e2c8;
+  font-size: 18px;
+}
+.pad .l { left: 0; top: 56px; }
+.pad .r { right: 0; top: 56px; }
+.pad .u { left: 56px; top: 0; }
+.pad .d { left: 56px; bottom: 0; }
+.act { right: 18px; bottom: 28px; width: 150px; height: 130px; }
+.act .jump { right: 0; bottom: 60px; width: 70px; height: 70px; }
+.act .atk { left: 0; bottom: 10px; width: 62px; height: 62px; }
+.act .join {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: auto;
+  height: 36px;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.world-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 18px;
+}
+.world-cell {
+  border: 1px solid rgba(212,180,106,0.3);
+  background: rgba(0,0,0,0.35);
+  padding: 10px 6px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #c9b48a;
+  cursor: pointer;
+}
+.world-cell.lock { opacity: 0.35; cursor: default; }
+.world-cell.cur { border-color: #ffe09a; }
+
+@media (max-width: 700px) {
+  .world-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-card { width: 100%; }
+  #overlay .panel { padding: 16px; }
+}

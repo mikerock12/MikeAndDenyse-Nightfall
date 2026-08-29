@@ -1,0 +1,9 @@
+<linker>
+  <assembly fullname="Unity.Netcode.Runtime" preserve="all"/>
+  <assembly fullname="Unity.Netcode.Components" preserve="all"/>
+  <assembly fullname="Unity.Networking.Transport" preserve="all"/>
+  <assembly fullname="Unity.Collections" preserve="all"/>
+  <assembly fullname="Unity.Burst" preserve="all"/>
+  <assembly fullname="Unity.Mathematics" preserve="all"/>
+  <assembly fullname="Assembly-CSharp" preserve="all"/>
+</linker>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Mike &amp; Denyse: Nightfall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" width="960" height="540"></canvas>
+
+    <div id="overlay">
+      <div id="screen-boot" class="panel">
+        <div class="subtitle">Carregando as trevas…</div>
+        <h1>NIGHTFALL</h1>
+        <p class="story" id="boot-msg">Preparando o pacto.</p>
+      </div>
+
+      <div id="screen-title" class="panel hidden">
+        <div class="subtitle">Um platformer cooperativo das trevas</div>
+        <h1>MIKE &amp; DENYSE</h1>
+        <h2>Nightfall</h2>
+        <p class="story">
+          A lua de sangue rasgou o véu. Florestas, cabanas, pântanos e tronos infernais
+          despertaram. Dois caçadores — a lâmina e o cristal — são a última linha
+          entre o vilarejo e o Senhor dos Pesadelos.
+        </p>
+        <div class="row">
+          <button class="btn" id="btn-start">Mesmo aparelho</button>
+          <button class="btn" id="btn-net">Rede local / P2P</button>
+          <button class="btn ghost" id="btn-howto">Controles</button>
+        </div>
+        <p class="story" style="margin-top:18px;font-size:12px;color:#9a8890">
+          16 fases · 32 monstros · 16 chefes · 1 chefão · coop local
+        </p>
+      </div>
+
+      <div id="screen-howto" class="panel hidden">
+        <h2>Controles</h2>
+        <p class="story">
+          <b>Jogador 1</b> — A/D andar · W ou Espaço ou J pular · K ou X atacar<br/>
+          <b>Jogador 2</b> — setas andar · Numpad 0 ou . pular · Numpad 1 ou / atacar<br/>
+          Enter chama o segundo caçador. Esc pausa. M silencia a música.<br/>
+          No toque: direcional à esquerda, pulo e ataque à direita.<br/>
+          <b>Dois celulares</b> — Rede local / P2P: um cria a sala (LAN ou Wi-Fi Direct), o outro procura e entra.
+        </p>
+        <p class="story">
+          Pise nos monstros ou golpeie. Mike corta de perto. Denyse dispara magia.
+          Alcancem o sino da fase e derrotem o chefe. No fim, Belial espera.
+        </p>
+        <div class="row"><button class="btn" id="btn-howto-back">Voltar</button></div>
+      </div>
+
+      <div id="screen-select" class="panel hidden">
+        <h2>Escolham os caçadores</h2>
+        <p class="subtitle">Toque no herói · P2 aperta Enter para entrar</p>
+        <div class="row" id="hero-row"></div>
+        <p class="story" id="p2-status">Jogador 2: aguardando…</p>
+        <div class="row">
+          <button class="btn" id="btn-play">Entrar na noite</button>
+        </div>
+      </div>
+
+      <div id="screen-net" class="panel hidden">
+        <h2>Caçada em rede</h2>
+        <p class="subtitle">Host / cliente · LAN Wi-Fi · Wi-Fi Direct</p>
+        <p class="story" id="net-status">Um aparelho cria a sala, o outro entra.</p>
+        <div class="row">
+          <button class="btn" id="btn-net-host">Criar sala (Wi-Fi LAN)</button>
+          <button class="btn" id="btn-net-p2p">Criar sala (Wi-Fi Direct)</button>
+          <button class="btn ghost" id="btn-net-scan">Procurar partidas</button>
+        </div>
+        <div class="row" id="net-rooms" style="margin-top:12px;flex-direction:column;align-items:stretch"></div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn" id="btn-net-go">Seguir para o mapa</button>
+          <button class="btn ghost" id="btn-net-back">Voltar</button>
+        </div>
+      </div>
+
+      <div id="screen-map" class="panel hidden">
+        <h2>O caminho maldito</h2>
+        <div class="world-grid" id="world-grid"></div>
+        <div class="row">
+          <button class="btn" id="btn-map-go">Seguir</button>
+          <button class="btn ghost" id="btn-map-back">Menu</button>
+        </div>
+      </div>
+
+      <div id="screen-pause" class="panel hidden">
+        <h2>A noite espera</h2>
+        <div class="row">
+          <button class="btn" id="btn-resume">Continuar</button>
+          <button class="btn ghost" id="btn-quit">Abandonar fase</button>
+        </div>
+      </div>
+
+      <div id="screen-clear" class="panel hidden">
+        <h2 id="clear-title">Fase vencida</h2>
+        <p class="story" id="clear-body"></p>
+        <div class="row">
+          <button class="btn" id="btn-next">Próxima fase</button>
+        </div>
+      </div>
+
+      <div id="screen-dead" class="panel hidden">
+        <h2>Os caçadores caíram</h2>
+        <p class="story">As trevas tomaram o campo. Resta tentar outra vez.</p>
+        <div class="row">
+          <button class="btn" id="btn-retry">Renascem</button>
+          <button class="btn ghost" id="btn-dead-map">Mapa</button>
+        </div>
+      </div>
+
+      <div id="screen-win" class="panel hidden">
+        <h1>AURORA</h1>
+        <h2>Belial foi selado</h2>
+        <p class="story" id="win-body">
+          Mike e Denyse atravessaram dezesseis noites. O trono racha, a lua
+          empalidece, e o vilarejo respira. O pacto aguarda a próxima lua de sangue.
+        </p>
+        <div class="row"><button class="btn" id="btn-win">Título</button></div>
+      </div>
+    </div>
+
+    <div id="touch">
+      <div class="pad">
+        <button class="l" data-k="p1l">◀</button>
+        <button class="r" data-k="p1r">▶</button>
+        <button class="u" data-k="p1j">▲</button>
+        <button class="d" data-k="p1d">▼</button>
+      </div>
+      <div class="act">
+        <button class="jump" data-k="p1j">PULO</button>
+        <button class="atk" data-k="p1a">GOLPE</button>
+      </div>
+      <button class="act join" data-k="join" style="position:absolute;right:18px;top:18px;width:auto;height:34px;border-radius:8px;padding:0 10px;font-size:11px">P2 ENTRA</button>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/net.js"></script>
+  <script src="js/engine.js"></script>
+</body>
+</html>

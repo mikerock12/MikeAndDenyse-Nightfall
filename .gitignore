@@ -1,0 +1,79 @@
+# ─────────────────────────────────────────────────────────────
+# Mike & Denyse: Nightfall — .gitignore
+# Regra: só entra no repo o que é FONTE. Tudo que uma ferramenta
+# regenera fica de fora (e o README diz qual comando regenera).
+# ─────────────────────────────────────────────────────────────
+
+# ── Unity: caches e saídas do Editor ──
+NightfallUnity/Library/
+NightfallUnity/Temp/
+NightfallUnity/Obj/
+NightfallUnity/Logs/
+NightfallUnity/UserSettings/
+NightfallUnity/Build/
+NightfallUnity/build/
+NightfallUnity/Builds/
+NightfallUnity/MemoryCaptures/
+NightfallUnity/Recordings/
+NightfallUnity/.vsconfig
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.opendb
+*.VC.db
+
+# Burst deixa isto ao lado do APK
+*_BurstDebugInformation_DoNotShip/
+*_BackUpThisFolder_ButDontShipItWithYourGame/
+
+# ── Arte derivada ──
+# Assets/Resources/Art é COPIADO de Assets/StreamingAssets/art por
+# AndroidBuilder.PrepareProject() (CopyArtIntoResources + PunchMagentaOnDisk).
+# A fonte da verdade é StreamingAssets/art, que está versionada.
+NightfallUnity/Assets/Resources/Art/
+NightfallUnity/Assets/Resources/Art.meta
+
+# ── Android / Gradle (cliente WebView de referência) ──
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/app/src/main/assets/www/
+.gradle/
+
+# ── APKs e binários de build ──
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# ── Ferramentas: logs, PIDs e saídas de execução ──
+tools/__pycache__/
+tools/artdump/
+tools/*.log
+tools/*.pid
+tools/*.err
+tools/*.out
+tools/*.json
+unity-*.log
+*.log
+
+# ── Esqueletos e cópias mortas (ver CONTEXT.md → "Mapa do repositório") ──
+_unused/
+UnityNightfall/
+
+# ── SO / editor ──
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Unity Android build scratch
+NightfallUnity/.utmp/
