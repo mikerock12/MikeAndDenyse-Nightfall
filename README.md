@@ -6,6 +6,8 @@ Dois caçadores — **Mike** (lâmina, mais vida, corpo a corpo) e **Denyse** (c
 
 `16 fases · 32 monstros · 16 chefes · 1 chefão · coop em dois celulares`
 
+![Tela-título](docs/screenshots/01-titulo.jpg)
+
 | | |
 |---|---|
 | Pacote | `com.mikeanddenyse.nightfall` |
@@ -27,6 +29,27 @@ Dois caçadores — **Mike** (lâmina, mais vida, corpo a corpo) e **Denyse** (c
 - [Testes](#testes)
 - [O que está no repositório e o que não está](#o-que-está-no-repositório-e-o-que-não-está)
 - [Documentação viva](#documentação-viva)
+- [Licença](#licença)
+
+---
+
+## O jogo rodando
+
+Capturas dos dois celulares na mesma partida, na noite 7 — *Ermos Congelados*.
+
+| | |
+|---|---|
+| ![Seleção de caçador](docs/screenshots/02-selecao-heroi.jpg) | ![Mapa das 16 noites](docs/screenshots/05-mapa.jpg) |
+| **Escolha o caçador** — Mike (6 vidas, golpe curto e pesado) ou Denyse (5 vidas, cristal à distância, queda lenta). | **O caminho maldito** — as 16 noites em ordem. Só a fase 1 começa aberta; vencer libera a seguinte. |
+
+| | |
+|---|---|
+| ![Coop, celular 1](docs/screenshots/06-coop-celular-1.jpg) | ![Coop, celular 2](docs/screenshots/07-coop-celular-2.jpg) |
+| **Celular 1** — os dois heróis, HUD de P1 e P2, um projétil de `icewraith` no ar. | **Celular 2** — a mesma partida, no mesmo instante: Mike no meio do golpe aéreo, placar e almas em sincronia. |
+
+Os dois HUDs mostram vida, vidas e o estado do parceiro ao mesmo tempo. Quem simula é o host;
+o segundo aparelho desenha o que chega no `FrameSnap` — ver
+[Multiplayer local](#multiplayer-local--como-funciona-de-verdade).
 
 ---
 
@@ -188,6 +211,15 @@ boss clear ui`), tocados por um pool de 6 `AudioSource`, com guarda de 35 ms por
 
 Não há servidor, nem conta, nem internet. **Os dois celulares precisam estar no mesmo Wi-Fi.**
 Um cria a sala, o outro procura e entra.
+
+| host — **CRIAR SALA** | cliente — **PROCURAR SALA** |
+|---|---|
+| ![Sala criada no host](docs/screenshots/03-sala-host.jpg) | ![Sala encontrada no cliente](docs/screenshots/04-sala-cliente.jpg) |
+| `Sala pronta · 192.168.1.3:7777` — o host já está anunciando por broadcast UDP. "Nenhuma sala encontrada ainda" é esperado: ele não escuta o próprio anúncio. | `MIKE & DENYSE · 192.168.1.3` — o cliente recebeu o pacote e mostra o IPv4 **do Wi-Fi do host**, escolhido por `LanIp.Pick()`. |
+
+O IP que aparece nas duas telas é o mesmo, e é isso que prova que a descoberta funcionou: o host
+anuncia `192.168.1.3` e o cliente lista `192.168.1.3`. Quando esse número divergia — tipicamente
+um endereço de dados móveis ou um `169.254.x.x` — a sala aparecia mas a conexão nunca fechava.
 
 ```
    CELULAR A (host)                                CELULAR B (cliente)
@@ -532,3 +564,17 @@ Três arquivos que valem tanto quanto o código, e que **toda mudança deve atua
 - Português nos textos de UI, inglês minúsculo nos IDs
 - Crash > softlock > gameplay > polish
 - Não commitar `Library/`, APKs ou caches do Unity Hub
+
+---
+
+## Licença
+
+**© 2026 Maicon Nunes — todos os direitos reservados.**
+
+O repositório é público para leitura e consulta. O código, a arte, os textos e o áudio são obra
+protegida e continuam sendo propriedade exclusiva do autor: **nenhuma licença de uso é concedida**.
+Clonar e ler para estudo pessoal, tudo bem; copiar, redistribuir, modificar, reaproveitar em outro
+projeto ou publicar builds, não — sem autorização prévia e por escrito.
+
+Texto completo em [`LICENSE`](LICENSE). As dependências de terceiros (Unity, Netcode for
+GameObjects, Unity Transport) não são distribuídas aqui e seguem as próprias licenças.

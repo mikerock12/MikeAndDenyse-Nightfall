@@ -1,6 +1,6 @@
 # MULTIAGENTS — Mike & Denyse: Nightfall
 
-Última atualização: 2026-08-17
+Última atualização: 2026-08-29
 
 Registro vivo dos agentes, papéis, entregas e o que cada um já fez.  
 Nada de trabalho “só na cabeça”: se um agente descobriu ou mudou algo, a linha entra aqui **e** em `PLAN.md` / `CONTEXT.md`.
@@ -236,3 +236,35 @@ choque), `Editor/Smoke.cs` (77 checks + Survey).
    deixar de bastar.
 4. Netcode — hoje o cliente é espelho puro. Predição local do próprio herói tiraria a borracha
    em Wi-Fi ruim.
+
+---
+
+### 2026-08-29 — orquestrador (versionamento e publicação)
+
+O projeto não tinha git: o `.git` em `D:\PROJETOS` era uma pasta vazia, não um repositório.
+
+- `git init` na raiz do projeto, branch `main`, commit inicial com 449 arquivos / ~198 MB
+- Repositório **público**: https://github.com/mikerock12/MikeAndDenyse-Nightfall
+- `.gitignore` pela regra "só entra fonte". Bloqueante de verdade eram os dois APKs
+  (163 MB e 118 MB), acima do limite rígido de 100 MB por arquivo do GitHub. Também ficaram
+  de fora, por serem regeneráveis:
+
+  | fora | regenerado por |
+  |---|---|
+  | `NightfallUnity/Library`, `Logs`, `.utmp` (8,7 GB) | o Unity ao abrir o projeto |
+  | `Assets/Resources/Art` (82 MB) | `AndroidBuilder.PrepareProject()` a partir de `StreamingAssets/art` |
+  | `android/app/src/main/assets/www` (109 MB) | `python tools/package.py` a partir de `game/` |
+  | `android/app/build` (350 MB), `_unused` (114 MB), `UnityNightfall` | build / cópias mortas |
+
+  Consequência a lembrar: **a fonte da arte é `StreamingAssets/art`**. Quem clonar e abrir no
+  Editor sem rodar o builder vê o fallback procedural até o primeiro `PrepareProject`.
+
+- `README.md` novo: arquitetura, laço principal, física em sub-passos, geração de fases,
+  multiplayer local (descoberta UDP → sessão NGO → autoridade → RPCs → `FrameSnap`), catálogo,
+  build, testes e o que está fora do repo.
+- `docs/screenshots/` com 7 capturas do usuário (título, seleção, sala no host, sala no cliente,
+  mapa, e o coop nos dois celulares na noite 7). As duas telas de sala mostram o mesmo
+  `192.168.1.3` nos dois aparelhos — é a prova visual de que `LanIp.Pick()` está anunciando o
+  IPv4 do Wi-Fi, e não o dos dados móveis.
+- `LICENSE`: **todos os direitos reservados** ao autor. Repositório público para leitura;
+  nenhuma licença de uso concedida.

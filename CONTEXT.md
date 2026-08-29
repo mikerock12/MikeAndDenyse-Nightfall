@@ -1,6 +1,6 @@
 # CONTEXT — Mike & Denyse: Nightfall
 
-Última atualização: 2026-08-17 (v3.1)
+Última atualização: 2026-08-29 (v3.1 · repositório público)
 
 Memória permanente do projeto. Qualquer agente ou sessão nova começa por aqui.
 
@@ -365,3 +365,19 @@ colocados à mão em `trees`, `hall`, `nave`, `tombs`, `roofs`, `ruins`, `check`
 - Toda decisão nova e todo bug novo **entra nestes três arquivos**
 - Português nos textos de UI; IDs em inglês minúsculo
 - Não commitar `Library/`, APKs intermediários ou caches do Hub
+
+---
+
+## Repositório
+
+Público em **https://github.com/mikerock12/MikeAndDenyse-Nightfall** (branch `main`).
+
+Versiona só a fonte. Regeneráveis ficam fora: `Library/`, `.utmp/`, APKs, `android/app/build/`,
+`_unused/`, `UnityNightfall/` e mais dois que importam saber:
+
+- **`Assets/Resources/Art/` não está no repo.** É cópia feita por `AndroidBuilder.PrepareProject()`
+  a partir de `Assets/StreamingAssets/art/` — essa é a fonte da verdade dos 77 PNG.
+- **`android/app/src/main/assets/www/` não está no repo.** É cópia byte a byte de `game/`,
+  refeita por `python tools/package.py`.
+
+`LICENSE`: todos os direitos reservados ao autor. Público para leitura, sem licença de uso.

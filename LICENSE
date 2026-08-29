@@ -1,0 +1,54 @@
+Mike & Denyse: Nightfall
+
+Copyright (c) 2026 Maicon Nunes. Todos os direitos reservados.
+Copyright (c) 2026 Maicon Nunes. All rights reserved.
+
+---
+
+PORTUGUÊS
+
+Este repositório é público apenas para leitura e consulta. O código-fonte, a
+arte, os textos, o áudio e os demais materiais aqui contidos são obra protegida
+por direito autoral e permanecem propriedade exclusiva do autor.
+
+Nenhuma licença é concedida. Sem autorização prévia e por escrito do autor, não
+é permitido:
+
+  - copiar, reproduzir ou redistribuir este projeto, no todo ou em parte;
+  - modificar, adaptar ou criar obras derivadas;
+  - usar o código, a arte ou os assets em outro projeto, comercial ou não;
+  - publicar, distribuir ou vender builds, APKs ou versões deste jogo.
+
+É permitido ler o código e clonar o repositório para estudo pessoal.
+
+Os pacotes e ferramentas de terceiros usados pelo projeto (Unity, Unity Netcode
+for GameObjects, Unity Transport e demais dependências declaradas em
+NightfallUnity/Packages/manifest.json) não são distribuídos aqui e permanecem
+sob suas próprias licenças.
+
+Para pedir autorização de uso, entre em contato com o autor.
+
+---
+
+ENGLISH
+
+This repository is public for reading and reference only. The source code, art,
+text, audio and other materials contained here are copyrighted works and remain
+the exclusive property of the author.
+
+No license is granted. Without the author's prior written permission, you may
+not:
+
+  - copy, reproduce or redistribute this project, in whole or in part;
+  - modify, adapt or create derivative works;
+  - use the code, art or assets in another project, commercial or otherwise;
+  - publish, distribute or sell builds, APKs or versions of this game.
+
+You may read the code and clone the repository for personal study.
+
+Third-party packages and tools used by the project (Unity, Unity Netcode for
+GameObjects, Unity Transport and the other dependencies declared in
+NightfallUnity/Packages/manifest.json) are not distributed here and remain under
+their own licenses.
+
+To request permission, contact the author.
