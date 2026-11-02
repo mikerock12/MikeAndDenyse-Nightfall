@@ -77,3 +77,11 @@ desktop.ini
 
 # Unity Android build scratch
 NightfallUnity/.utmp/
+
+# NightfallNative C++20 build & packaged artifacts
+NightfallNative/build/
+NightfallNative/Saved/
+NightfallNative/DartConfiguration.tcl
+nightfall_progress.cfg
+*.exe
+*.zip

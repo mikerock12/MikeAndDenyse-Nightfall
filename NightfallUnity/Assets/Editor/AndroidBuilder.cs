@@ -25,7 +25,9 @@ namespace Nightfall.Editor
                 ApplyPlayerSettings();
                 PointAndroidTools();
 
-                string outPath = @"D:\MikeAndDenyse\MikeAndDenyse-Nightfall-NGO.apk";
+                string outPath = Environment.GetEnvironmentVariable("NIGHTFALL_APK_OUT");
+                if (string.IsNullOrEmpty(outPath))
+                    outPath = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "MikeAndDenyse-Nightfall-NGO.apk"));
                 if (File.Exists(outPath)) File.Delete(outPath);
 
                 var opts = new BuildPlayerOptions
@@ -261,12 +263,26 @@ namespace Nightfall.Editor
 
         static void PointAndroidTools()
         {
+            string sdkRoot = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT")
+                ?? Environment.GetEnvironmentVariable("ANDROID_HOME")
+                ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Android", "Sdk");
             string[] sdkCands =
             {
+                sdkRoot,
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Android", "Sdk")
             };
-            string[] ndkCands = { @"D:\Unity\Downloads\android-ndk-r27c" };
-            string[] jdkCands = { @"D:\Unity\Downloads\jdk-extract" };
+            string[] ndkCands =
+            {
+                Environment.GetEnvironmentVariable("ANDROID_NDK_ROOT") ?? "",
+                Path.Combine(sdkRoot, "ndk", "27.0.12077973"),
+                @"D:\Unity\Downloads\android-ndk-r27c"
+            };
+            string[] jdkCands =
+            {
+                Environment.GetEnvironmentVariable("JAVA_HOME") ?? "",
+                @"C:\Program Files\Microsoft\jdk-17.0.21.21-hotspot",
+                @"D:\Unity\Downloads\jdk-extract"
+            };
             string sdk = FirstDir(sdkCands);
             string ndk = FirstDir(ndkCands);
             string jdk = FirstDir(jdkCands);

@@ -1,6 +1,7 @@
 const fs = require("fs");
+const path = require("path");
 const vm = require("vm");
-const game = "D:/MikeAndDenyse/game/js";
+const game = path.resolve(__dirname, "..", "game", "js");
 const code =
   fs.readFileSync(game + "/data.js", "utf8") +
   "\n" +

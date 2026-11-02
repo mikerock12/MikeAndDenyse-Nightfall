@@ -1,0 +1,32 @@
+name: NightfallNative C++20 & Parity CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Python Progress & LanIp Tests
+        run: python tools/test_progress.py
+
+      - name: Run Node Level Smoke (16 Worlds)
+        run: node tools/smoke_levels.js
+
+      - name: Configure NightfallNative CMake (MSVC Release)
+        working-directory: NightfallNative
+        run: cmake --preset windows-msvc-release
+
+      - name: Build NightfallNative & Smoke Tests
+        working-directory: NightfallNative
+        run: cmake --build --preset windows-msvc-release
+
+      - name: Run CTest (77 Smoke Checks + LAN UDP Loopback + Headless Smoke)
+        working-directory: NightfallNative
+        run: ctest --preset windows-msvc-release --output-on-failure -V
