@@ -268,3 +268,14 @@ O projeto não tinha git: o `.git` em `D:\PROJETOS` era uma pasta vazia, não um
   IPv4 do Wi-Fi, e não o dos dados móveis.
 - `LICENSE`: **todos os direitos reservados** ao autor. Repositório público para leitura;
   nenhuma licença de uso concedida.
+
+
+### 2026-11-02 — agente Nightfall / correção da publicação nativa
+
+- Reutilizou o core C++ existente e preservou Unity/WebView. NativeActivity agora usa o mesmo frontend raylib do Windows, com menus por toque, pads multitouch, audio e atlas original portado, save privado e LAN nativo versionado.
+- Corrigiu IPv4 falso, recebimento incompleto de chefe/Belial, roster fantasma, ataques remotos, retransmissão de início/retry, ordenação de snapshots e drenagem de FX.
+- Compilou três fontes C# originais inalterados com adaptador MathF/RNG controlado: 100.800 passos e 16 hashes de mapa passaram com erro máximo de 0,00024 (tolerância 0,001). Isso não executa o renderizador nem o RNG Unity.
+- Windows real: instalador /CURRENTUSER isolado, 80 arquivos iguais ao ZIP, headless e render dos 16 mundos, uninstall exit0; runtime /MT e imports PE sem MSVCP/VCRUNTIME.
+- CI real revelou tutorial fullscreen e, depois dele, assets zero apesar dos 77 PNG no APK. Corrigiu leitura do aplicativo via callbacks AAssetManager diretos; não reduziu as assertions. PR #2 aberto, QA Android final e publicação ainda pendentes.
+- Keystore Android existente só foi reutilizado após autorização explícita do usuário; certificado do candidato comparado ao APK público 1.0.0, sem expor senha. Novo APK final aguarda código aprovado pelo QA.
+- Coordenação/portal/release/Drive permanecem com o coordenador. Nenhuma homologação física declarada.

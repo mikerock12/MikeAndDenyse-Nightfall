@@ -7,7 +7,7 @@ Responsável pela implementação: Codex / agente Nightfall. O coordenador conso
 - O APK 1.0.0 tinha `SurfaceView` e loop JNI sem renderização. `MainActivity` agora estende `NativeActivity`; `libnightfall.so` contém raylib e o mesmo `src/main.cpp` usado no Windows. A antiga ponte de simulação foi removida.
 - Menus funcionam por toque, mouse, teclado e confirmação por gamepad. Há seleção dos dois heróis, mapa, sala LAN, pausa, retorno, morte e conclusão. O atalho de depuração que liberava todas as fases foi retirado da interface.
 - Todos os dedos participam dos controles. Pulo e ataque disparam na borda, enquanto movimento e pulo sustentado permanecem ativos. Coordenadas usam o viewport 16:9, inclusive em telas mais largas. O botão Android Voltar pausa ou retorna ao menu anterior.
-- Os 77 PNG originais são indexados no APK e carregados por `AAssetManager`. Sprites preservam proporção, pés e espelho horizontal; não usam largura de destino negativa. Texturas são carregadas sob demanda, limitadas a 512 px nos sprites e 1024 px nos cenários, sem alterar os fontes originais.
+- Os 77 PNG originais são indexados no APK e carregados por callbacks explícitos de `AAssetManager_open/read`, inclusive para entradas comprimidas. O teste emulado detectou que o fallback `fopen/funopen` não abria o índice apesar de ele estar no APK; a correção está no aplicativo, sem reduzir a assertion de 77 assets. Sprites preservam proporção, pés e espelho horizontal; não usam largura de destino negativa. Texturas são carregadas sob demanda, limitadas a 512 px nos sprites e 1024 px nos cenários, sem alterar os fontes originais.
 - `NativeWorldArt.h` porta os algoritmos de atlas 11 × 2, chão, plataformas, espinhos, sarças, líquidos, gelo, mola e escada de `ArtGen.cs`, além de céu, cristas, vinheta e corações. Decoração, atmosfera, golpes, projéteis, santuário e HUD dos dois heróis voltam a aparecer. O seed cosmético usa FNV estável em lugar do `String.GetHashCode` variável por processo do .NET; partículas e composição de menus não são uma comparação pixel a pixel com Unity.
 - SFX incluem as misturas originais de impacto, pisada e chefe, guarda de 35 ms, volume e variação cosmética de pitch. Não usam o RNG da simulação.
 - Progresso Windows vai para `%LOCALAPPDATA%/SmellsLikeTech/Nightfall`, com importação única do arquivo legado ao lado do executável. Android usa o diretório privado da atividade. A chave de assinatura existente não é substituída.
@@ -46,6 +46,8 @@ python tests/compare_reference.py
 
 O relatório é gerado em `Saved/reference-parity-report.json`. A opção `NightfallNative.exe --render-smoke <diretorio>` executa o frontend gráfico real em janela oculta e exporta o framebuffer de cada mundo com os dois heróis após 180 passos. As capturas são uma cena iniciada por teste, com dados sintéticos; não simulam validação humana dos menus. A execução Windows foi concluída nos 16 mundos com 77 assets indexados. Áudio é silenciado somente nesse modo de captura.
 
+O instalador real também foi executado silenciosamente em diretório isolado, sem instalação anterior: 80 arquivos coincidiram por SHA-256 com o ZIP portátil; o executável instalado passou headless e renderizou os 16 mundos. O processo de teste recebeu `LOCALAPPDATA` próprio. A desinstalação terminou com código zero e retirou o executável e a entrada de teste do Registro. `Scripts/Test-Windows-Candidate.ps1` reproduz o teste e recusa substituir instalação existente.
+
 ## Builds e assinatura
 
 ```powershell
@@ -55,6 +57,8 @@ O relatório é gerado em `Saved/reference-parity-report.json`. A opção `Night
 ```
 
 Android compila raylib 5.5 oficial com NDK 27.0.12077973, API mínima 26 e alvo 36. O arquivo-fonte de raylib é travado pelo SHA-256 `00e8a7c85f7a5221e56ee8e4e1c6642b773eae73d29379a91c8ac5149e803f42`. `-RaylibSource` permite reaproveitar essa fonte local. ELF ARM64 foi conferido com segmentos LOAD de alinhamento `0x4000` e runtime C++ estático; `zipalign -P 16` trata o APK.
+
+Windows também usa runtime C++ estático (`/MT`). A auditoria PE do executável passou a listar apenas `raylib.dll`, `WS2_32.dll`, `IPHLPAPI.DLL` e `KERNEL32.dll`; a raylib distribuída importa somente DLLs do Windows. O pacote não depende de uma instalação prévia do Visual Studio ou do Visual C++ Redistributable.
 
 `-QaDebug` cria uma identidade de teste descartável em `Saved/qa-signing`, pacote separado `com.mikeanddenyse.nightfall.qa` e aplicativo depurável. Essa chave não atualiza o app publicado e nunca deve ser enviada como release. `-UnsignedOnly` não acessa chave ou senha e gera um APK que ainda não pode ser instalado.
 

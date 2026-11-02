@@ -470,3 +470,17 @@ Acrescentado na v3.0:
 14. Morrer mostra o painel com o mundo atrás; a tela nunca fica preta e travada
 15. No coop, o segundo celular vê coleta de item, projétil, corte, faísca e barra de chefe
 16. O título tem **Sair** e ele fecha o app de verdade
+
+
+## Rodada nativa de 02/11/2026
+
+- [x] Frontend C++ compartilhado no Android NativeActivity, sem loop JNI vazio.
+- [x] Paridade headless independente: 100.800 passos contra C# original e hashes dos 16 mapas.
+- [x] Multitouch, menus, progresso, áudio e arte procedural portados; wire LAN v3 explícito com ordenação.
+- [x] Windows /MT, PE auditado, instalação/restauração de 80 arquivos, renderização real dos 16 mundos e desinstalação isoladas.
+- [x] PR #2 e builds hospedados Windows/Android executados.
+- [ ] Aprovar execução emulada Android após corrigir o carregamento AAssetManager detectado pelo próprio QA.
+- [ ] Conferência humana das capturas finais, teste físico ARM64 e Wi-Fi com dois aparelhos (não disponíveis).
+- [ ] Assinar pacote final aprovado com certificado existente, CI verde, merge/publicação coordenada e backup privado restaurável.
+
+Método, comandos e limites em `NightfallNative/docs/FIDELITY_REPAIR.md`. Responsável: Codex / agente Nightfall; coordenador consolida a entrega.

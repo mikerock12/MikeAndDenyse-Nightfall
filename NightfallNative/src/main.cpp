@@ -16,12 +16,43 @@
 #include <cstdlib>
 #ifdef PLATFORM_ANDROID
 #include <android_native_app_glue.h>
+#include <android/asset_manager.h>
 extern "C" struct android_app* GetAndroidApp(void);
 #endif
 
 namespace
 {
     using namespace Nightfall;
+
+#ifdef PLATFORM_ANDROID
+    unsigned char* LoadAndroidAsset(const char* name,int* size)
+    {
+        *size=0;
+        AAssetManager* manager=GetAndroidApp()->activity->assetManager;
+        AAsset* asset=AAssetManager_open(manager,name,AASSET_MODE_STREAMING);
+        if(!asset) { TraceLog(LOG_ERROR,"NIGHTFALL_ASSET: missing %s",name);return nullptr; }
+        off64_t length=AAsset_getLength64(asset);
+        if(length<=0 || length>0x7fffffff) { AAsset_close(asset);return nullptr; }
+        auto data=static_cast<unsigned char*>(MemAlloc(static_cast<unsigned int>(length)));
+        int read=0;
+        while(data && read<length) {
+            int count=AAsset_read(asset,data+read,static_cast<size_t>(length-read));
+            if(count<=0)break;
+            read+=count;
+        }
+        AAsset_close(asset);
+        if(read!=length) { if(data)MemFree(data);return nullptr; }
+        *size=read;return data;
+    }
+    char* LoadAndroidAssetText(const char* name)
+    {
+        int size=0;auto data=LoadAndroidAsset(name,&size);
+        if(!data)return nullptr;
+        auto text=static_cast<char*>(MemAlloc(static_cast<unsigned int>(size+1)));
+        if(text) { std::memcpy(text,data,size);text[size]='\0'; }
+        MemFree(data);return text;
+    }
+#endif
 
     Color HexToColor(const std::string& hex, Color fallback = BLACK)
     {
@@ -356,6 +387,11 @@ int main(int argc, char** argv)
     if(renderSmokeDirectory.empty()) sfx.Init();
     NativeWorldArt worldArt;
     NativeSpriteBank sprites;
+#ifdef PLATFORM_ANDROID
+    // Read compressed APK entries directly; avoid libc/funopen filename fallback.
+    SetLoadFileDataCallback(LoadAndroidAsset);
+    SetLoadFileTextCallback(LoadAndroidAssetText);
+#endif
     sprites.LoadAll();
     if(!renderSmokeDirectory.empty() && sprites.AssetCount()!=77) {
         TraceLog(LOG_ERROR,"Render smoke requires all 77 original assets"); CloseWindow(); return 3;
@@ -607,7 +643,7 @@ int main(int argc, char** argv)
             DrawRectangle(0, 0, T::ViewW, T::ViewH, Color{10, 6, 16, 150});
             DrawText("MIKE & DENYSE", 250, 120, 56, Color{230, 195, 110, 255});
             DrawText("NIGHTFALL", 335, 185, 48, Color{200, 70, 90, 255});
-            DrawText("16 Noites Â· Coop Local & LAN Wi-Fi Â· C++20 Native", 230, 260, 20, LIGHTGRAY);
+            DrawText("16 noites - 32 monstros - 16 chefes - Belial", 245, 260, 20, LIGHTGRAY);
             Button({300,300,360,52},"Um jogador");
             Button({300,362,360,52},"Dois celulares - Wi-Fi LAN");
             Button({300,424,170,48},"Controles"); Button({490,424,170,48},"Sair");
