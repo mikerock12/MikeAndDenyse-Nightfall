@@ -30,7 +30,16 @@ namespace
         *size=0;
         AAssetManager* manager=GetAndroidApp()->activity->assetManager;
         AAsset* asset=AAssetManager_open(manager,name,AASSET_MODE_STREAMING);
-        if(!asset) { TraceLog(LOG_ERROR,"NIGHTFALL_ASSET: missing %s",name);return nullptr; }
+        if(!asset) {
+            TraceLog(LOG_ERROR,"NIGHTFALL_ASSET: missing %s",name);
+            AAssetDir* dir=AAssetManager_openDir(manager,"art");
+            if(dir) {
+                const char* entry;
+                while((entry=AAssetDir_getNextFileName(dir))) TraceLog(LOG_ERROR,"NIGHTFALL_ASSET_DIR: art/%s",entry);
+                AAssetDir_close(dir);
+            }
+            return nullptr;
+        }
         off64_t length=AAsset_getLength64(asset);
         if(length<=0 || length>0x7fffffff) { AAsset_close(asset);return nullptr; }
         auto data=static_cast<unsigned char*>(MemAlloc(static_cast<unsigned int>(length)));

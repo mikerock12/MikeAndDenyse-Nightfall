@@ -5,11 +5,20 @@ import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.view.View;
 import android.view.WindowManager;
+import android.util.Log;
+import java.io.IOException;
 /** The complete C++ frontend owns rendering, input and audio. */
 public class MainActivity extends NativeActivity {
     private WifiManager.MulticastLock discoveryLock;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        try {
+            String[] files = getAssets().list("art");
+            Log.i("NightfallAssets", "Java art entries: " + java.util.Arrays.toString(files));
+            try (java.io.InputStream index = getAssets().open("art/index.txt")) {
+                Log.i("NightfallAssets", "Java index first byte: " + index.read());
+            }
+        } catch (IOException error) { Log.e("NightfallAssets", "APK assets inaccessible", error); }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().getDecorView().setSystemUiVisibility(
             View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |

@@ -11,12 +11,25 @@ import subprocess
 import sys
 import time
 import xml.etree.ElementTree as ET
+import zipfile
 
 apk = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
 output.mkdir(parents=True, exist_ok=True)
 package = 'com.mikeanddenyse.nightfall.qa'
 activity = 'com.mikeanddenyse.nightfall.MainActivity'
+
+# Validate the exact hosted candidate before installing: an APK can install and
+# render NativeActivity even when its asset ZIP entries are unusable or absent.
+with zipfile.ZipFile(apk) as archive:
+    names = archive.namelist()
+    index = archive.read('assets/art/index.txt').decode('utf-8').splitlines()
+    assert len(index) == 77, f'Expected 77 original images, got {len(index)}'
+    for relative in index:
+        asset = 'assets/art/' + relative
+        assert asset in names, f'Index points to absent ZIP entry {asset!r}'
+        assert archive.read(asset)[:8] == b'\x89PNG\r\n\x1a\n', asset
+    (output/'apk-assets.json').write_text(json.dumps({'index':index,'entries':names},indent=2),encoding='utf-8')
 def adb(*args):
     return subprocess.run(['adb', *args], capture_output=True, check=True).stdout
 adb('install', '-r', str(apk))
