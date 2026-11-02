@@ -22,7 +22,7 @@ jobs:
 
       - name: Configure NightfallNative CMake (MSVC Release)
         working-directory: NightfallNative
-        run: cmake --preset windows-msvc-release
+        run: cmake -S . -B build/windows-msvc-release -G 'Ninja Multi-Config' -DCMAKE_CONFIGURATION_TYPES=Release
 
       - name: Build NightfallNative & Smoke Tests
         working-directory: NightfallNative
@@ -57,6 +57,9 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
       - name: Install pinned Android toolchain
         shell: pwsh
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
