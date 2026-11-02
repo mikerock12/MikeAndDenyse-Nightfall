@@ -10,6 +10,7 @@ import struct
 import subprocess
 import sys
 import time
+import xml.etree.ElementTree as ET
 
 apk = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
@@ -21,10 +22,39 @@ def adb(*args):
 adb('install', '-r', str(apk))
 adb('logcat', '-c')
 adb('shell', 'wm', 'size', '540x960')
+adb('shell', 'wm', 'density', '160')
+adb('shell', 'settings', 'put', 'secure', 'immersive_mode_confirmations', 'confirmed')
 adb('shell', 'settings', 'put', 'system', 'accelerometer_rotation', '0')
 adb('shell', 'settings', 'put', 'system', 'user_rotation', '1')
 adb('shell', 'am', 'start', '-W', '-n', f'{package}/{activity}')
 time.sleep(4)
+def dismiss_system_onboarding():
+    # A fresh emulator may show Android's first-fullscreen tutorial above the
+    # NativeActivity. Dismiss its actual accessibility node; do not send blind
+    # back events which would quit the game's title screen.
+    try:
+        adb('shell','uiautomator','dump','/sdcard/nightfall-window.xml')
+        xml=adb('shell','cat','/sdcard/nightfall-window.xml').decode('utf-8',errors='replace')
+        (output/'initial-window.xml').write_text(xml,encoding='utf-8')
+        for node in ET.fromstring(xml).iter('node'):
+            text=(node.get('text','')+' '+node.get('content-desc','')).strip().lower()
+            if text in ['got it','ok','entendi']:
+                numbers=[int(value) for value in re.findall(r'\d+',node.get('bounds',''))]
+                if len(numbers)==4:
+                    adb('shell','input','tap',str((numbers[0]+numbers[2])//2),str((numbers[1]+numbers[3])//2))
+                    time.sleep(1)
+    except (subprocess.CalledProcessError,ET.ParseError):
+        pass
+dismiss_system_onboarding()
+for attempt in range(30):
+    startup_log=adb('logcat','-d','-s','raylib').decode('utf-8',errors='replace')
+    if 'indexed 77 original sprite assets' in startup_log and 'NIGHTFALL_SCREEN: 0' in startup_log:
+        break
+    time.sleep(1)
+else:
+    (output/'logcat.txt').write_bytes(adb('logcat','-d'))
+    (output/'startup-blocked.png').write_bytes(adb('exec-out','screencap','-p'))
+    raise RuntimeError('Native frontend did not finish initialization with all 77 assets')
 images = []
 width, height = 960, 540
 def capture(name):
