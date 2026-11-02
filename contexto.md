@@ -36,3 +36,5 @@
 | 01/11/2026 | **Fases G2 e G3**: Sincronização de marco — `RuaDeAcoUnreal` C++20/CTest 44/44 aprovado | Pronto para iniciar Fase G5 após empacotamento G4 | Coordenador SLT Games |
 | 01/11/2026 | **Fase G4**: Sincronização de marco — `RuaDeAcoUnreal` v0.2.0 empacotado (Win64 + Android ARM64) | Início imediato da Fase G5 (`NightfallNative`) | Coordenador SLT Games |
 | 01/11/2026 | **Fases G5 e G6**: `NightfallNative` C++20 + raylib, CTest 77/77 checks + LAN UDP loopback (`3,95 ms` / 10k ticks), empacotamento Win64/Android v1.0.0 | `.exe` (`93.543.731 B`), `.zip` (`91.604.492 B`), `.apk` (`90.773.704 B`, assinado v2/v3) | Coordenador SLT Games |
+| 01/11/2026 | **Fase G7**: Merge PR #1 (`07f6ac8`) + Publicação da Release GitHub estável `v1.0.0` (`https://github.com/mikerock12/MikeAndDenyse-Nightfall/releases/tag/v1.0.0`) | 4 assets publicados e verificados por digest SHA-256 | Coordenador SLT Games |
+| 01/11/2026 | **Fase G8**: Publicação de `/games/mike-and-denyse/` no portal (`5fe367e`, Worker `f24ab0eb-d181-435b-b8ce-5764468138c8`) | Páginas 200, APIs 200 com SHA-256 v1.0.0 e redirects 302 validados | Coordenador SLT Games |
