@@ -381,3 +381,9 @@ Versiona só a fonte. Regeneráveis ficam fora: `Library/`, `.utmp/`, APKs, `and
   refeita por `python tools/package.py`.
 
 `LICENSE`: todos os direitos reservados ao autor. Público para leitura, sem licença de uso.
+
+
+## Registro de Etapas (Plano SLT Games 2026)
+
+- **2026-11-01 / Fase G0 (Inventário e Baseline P0)**: Criados `AGENTS.md`, `contexto.md` e `package.json` raiz (`commonjs`) em `MikeAndDenyse`. Commit local `bcfa560` preservado em `archive/local-main-bcfa560` e branch `feat/nightfall-native-cpp` iniciada a partir de `origin/main` (`38c7298`). Baseline `tools/test_progress.py` e `tools/smoke_levels.js` verificados. Ausência de `Unity.exe` local registrada (`BLOCKED_UNITY_EDITOR_LOCAL`). Próxima etapa: Fase G5 (`NightfallNative` em C++20 + raylib e port das 77 verificações de `Smoke.cs`). Responsável: Coordenador SLT Games.
+- **2026-11-01 / Fases G5 e G6 (`NightfallNative` C++20 + raylib e Empacotamento v1.0.0)**: Criado `NightfallNative/` em C++20 + raylib 5.5 lado a lado com `NightfallUnity/` (preservado intacto). Aprovadas as 77 verificações de `Smoke.cs` + loopback UDP LAN real (`47888` descoberta + `7777` `FrameSnap` v2) + benchmark de 10.000 ticks em `3,95 ms` via CTest. Gerados os pacotes oficiais `v1.0.0` para Windows x64 (`.exe` e `.zip`) e Android ARM64 (`.apk`). Responsável: Coordenador SLT Games.
