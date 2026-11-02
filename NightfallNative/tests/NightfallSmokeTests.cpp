@@ -198,6 +198,29 @@ namespace
 
     int CheckSnapshot()
     {
+        FrameSnap wireFixture;
+        wireFixture.P0.X=1.0f; wireFixture.P0.Hp=6; wireFixture.Score=0x01020304;
+        auto wire=wireFixture.Serialize();
+        if(wire.size()!=92 || wire[0]!=3 || wire[1]!=0 || wire[2]!=0 || wire[3]!=0x80 || wire[4]!=0x3f || wire[9]!=6 || wire[31]!=4 || wire[32]!=3 || wire[33]!=2 || wire[34]!=1)
+            throw std::runtime_error("wire native v3 depende de ABI/padding ou endian incorreto");
+        FrameSnap wireRead;
+        if(!FrameSnap::Deserialize(wire.data(),wire.size(),wireRead) || wireRead.Serialize()!=wire)
+            throw std::runtime_error("wire v3 nao faz roundtrip estavel byte a byte");
+        auto invalidWire=wire; invalidWire.push_back(0);
+        if(FrameSnap::Deserialize(invalidWire.data(),invalidWire.size(),wireRead)) throw std::runtime_error("wire aceitou lixo final");
+        invalidWire=wire; invalidWire[0]=2;
+        if(FrameSnap::Deserialize(invalidWire.data(),invalidWire.size(),wireRead)) throw std::runtime_error("wire aceitou protocolo antigo");
+        invalidWire=wire; invalidWire[1]=0;invalidWire[2]=0;invalidWire[3]=0xc0;invalidWire[4]=0x7f;
+        if(FrameSnap::Deserialize(invalidWire.data(),invalidWire.size(),wireRead)) throw std::runtime_error("wire aceitou posicao NaN");
+        std::vector<uint8_t> packet={'S','N','P','3',1,0,0,0,2,0,0,0};
+        packet.insert(packet.end(),wire.begin(),wire.end());uint32_t sequence=0;
+        if(!Net::LanSession::DecodeSnapshotPacket(packet.data(),packet.size(),1,sequence,wireRead) || sequence!=2)
+            throw std::runtime_error("envelope snapshot v3 invalido");
+        if(Net::LanSession::DecodeSnapshotPacket(packet.data(),packet.size(),1,sequence,wireRead)) throw std::runtime_error("snapshot duplicado aceito");
+        packet[8]=1;
+        if(Net::LanSession::DecodeSnapshotPacket(packet.data(),packet.size(),1,sequence,wireRead)) throw std::runtime_error("snapshot fora de ordem aceito");
+        packet[8]=3;packet[4]=0;
+        if(Net::LanSession::DecodeSnapshotPacket(packet.data(),packet.size(),1,sequence,wireRead)) throw std::runtime_error("snapshot de outra partida aceito");
         if (GameSim::ProjKindId("magic") != 0) throw std::runtime_error("proj magic");
         if (GameSim::ProjKindName(GameSim::ProjKindId("hell")) != "hell") throw std::runtime_error("proj hell");
         if (GameSim::ProjKindName(GameSim::ProjKindId("ice")) != "ice") throw std::runtime_error("proj ice");
@@ -226,6 +249,33 @@ namespace
         FrameSnap decoded;
         if (!FrameSnap::Deserialize(bytes.data(), bytes.size(), decoded))
             throw std::runtime_error("falha roundtrip FrameSnap");
+        FrameSnap truncated;
+        if (FrameSnap::Deserialize(bytes.data(), bytes.size()-1, truncated))
+            throw std::runtime_error("snapshot truncado foi aceito");
+
+        // Exercise the receiving simulation, not only serialization: the old native
+        // client ignored boss activation, hero identity, attack timing and stale enemies.
+        GameSim hostState;
+        hostState.Start(15,"denyse","mike",true);
+        hostState.Players[0].X=4000; hostState.Players[0].Atk=0.12f;
+        hostState.Players[1].X=4050;
+        hostState.LockedArena=true; hostState.Items[0].Taken=true;
+        BossA belial;
+        belial.Def=Catalog::Belial(); belial.Id="belial"; belial.Hp=17; belial.MaxHp=Catalog::Belial().Hp;
+        belial.X=4200; belial.Y=360; belial.Facing=-1;
+        hostState.Bosses.push_back(belial);
+        hostState.Enemies.resize(1);
+        auto remoteSnap=hostState.CaptureSnapshot();
+        GameSim remote;
+        remote.Start(15,"mike","denyse",true);
+        remote.ApplySnapshot(remoteSnap);
+        remote.TickRemote(1.0f/60.0f);
+        if(remote.Players[0].Hero.Id!="denyse" || remote.Players[1].Hero.Id!="mike" || remote.Players[0].Atk<=0)
+            throw std::runtime_error("identidade e golpe do heroi nao aplicados no cliente");
+        if(remote.Bosses.size()!=1 || remote.Bosses[0].Id!="belial" || remote.Bosses[0].Hp!=17 || remote.Bosses[0].Facing!=-1 || !remote.BelialPhase)
+            throw std::runtime_error("Belial nao reconstruido no cliente");
+        if(remote.Enemies.size()!=remoteSnap.Ents.size() || !remote.Items[0].Taken || remote.CamX<=0)
+            throw std::runtime_error("estado remoto deixa inimigos fantasmas, item ou camera incorreta");
 
         for (int i = 0; i < 600; ++i) sim.Tick(1.0f / 60.0f);
         if (sim.Players[0].Dead) throw std::runtime_error("heroi morreu parado no spawn");
@@ -343,6 +393,8 @@ namespace
         std::string pkt = Net::LanSession::BuildDiscoveryPacket("dev-host", "Sala Nightfall", "192.168.1.3", 17777);
         if (!Net::LanSession::ParseDiscoveryPacket(pkt, parsed) || parsed.host != "192.168.1.3" || parsed.port != 17777)
             throw std::runtime_error("falha no parser de descoberta LAN");
+        if(Net::LanSession::ParseDiscoveryPacket("NIGHTFALL|{\"id\":\"unity\",\"name\":\"Unity room\",\"host\":\"192.168.1.3\",\"port\":7777,\"kind\":\"lan\"}",parsed))
+            throw std::runtime_error("cliente nativo aceitou sala Unity incompativel");
 
         Net::LanSession host;
         Net::LanSession client;
@@ -387,6 +439,20 @@ namespace
         }
         if (!gotSnap || clientSnap.Score != 750 || clientSnap.Souls != 12)
             throw std::runtime_error("falha ao receber FrameSnap v2 via UDP loopback");
+        if(!started || startWorld!=0 || hHero!="mike" || cHero!="denyse")
+            throw std::runtime_error("inicio de partida nao recebido");
+        host.BroadcastSnapshot(hostSim.CaptureSnapshot());
+        bool duplicate=false;
+        client.PollClientSnapshot(clientSnap,startWorld,hHero,cHero,duplicate);
+        if(duplicate) throw std::runtime_error("inicio retransmitido reinicia a partida");
+        host.SendStartMatch(0,"mike","denyse");
+        bool retry=false;
+        client.PollClientSnapshot(clientSnap,startWorld,hHero,cHero,retry);
+        if(!retry) throw std::runtime_error("retry na mesma fase nao reinicia cliente");
+        host.Stop();
+        bool ended=false;
+        client.PollClientSnapshot(clientSnap,startWorld,hHero,cHero,ended);
+        if(client.IsConnectedClient()) throw std::runtime_error("saida do host nao encerra cliente");
     }
 }
 

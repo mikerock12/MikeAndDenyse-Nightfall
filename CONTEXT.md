@@ -1,5 +1,26 @@
 # CONTEXT — Mike & Denyse: Nightfall
 
+## Correção nativa em validação — 02/11/2026
+
+Frontend C++ compartilhado Windows/Android (raylib NativeActivity), menus touch, comandos com bordas multitouch, pausa/back, arte original e atlas procedural, SFX, progresso em diretório gravável e LAN com IPv4 real implementados. Transporte nativo v3 usa campos explícitos little-endian, sem padding de ABI, e rejeita salas/protocolos incompatíveis. Unity e demais referências preservados.
+
+Verificações locais: CTest 2/2; comparação independente de três fontes C# originais inalteradas com C++ em 100.800 passos e hashes dos 16 mapas (tolerância 0,001 px, maior diferença 0,00024 px). A referência de teste usa adaptadores MathF e RNG controlado, não o runtime gráfico Unity. Render smoke Windows exportou os 16 mundos pelo frontend real. Candidatos 1.0.1 Windows e Android compilados; APK de QA tem pacote/chave separados. CI com emulador Android, revisão visual/funcional final, assinatura da atualização, PR/merge, releases, portal e backup final ainda precisam ser concluídos; nenhum aparelho físico está disponível. Não tratar estes resultados como homologação física ou equivalência integral de toda a interface. Método e evidências: NightfallNative/docs/FIDELITY_REPAIR.md (se presente), testes de referência e relatórios em NightfallNative/Saved/. Backup antigo do histórico no Drive falhou em restauração por corrupção do bundle; ZIP de fontes recuperável, backup novo exige clone/restauração real. Responsável: Codex.
+
+## Localização real dos projetos — 02/11/2026
+
+Raiz de trabalho confirmada: `D:\PROJETOS\SoftwaresSmellsLikeTech`. Não procurar nem criar cópias em `D:\PROJETOS\RuaDeAco`, `D:\PROJETOS\RuaDeAcoUnreal` ou `D:\MikeAndDenyse`: referências a esses locais em registros antigos são históricas.
+
+| Pasta real | Papel |
+|---|---|
+| `D:\PROJETOS\SoftwaresSmellsLikeTech` | Portal existente e coordenação da publicação; preserva seus cinco submódulos de softwares. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAco` | Jogo original TypeScript/Phaser atualizado; fonte canônica de regras, lutadores, golpes, apresentação, arte e áudio para o port C++. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAcoUnreal` | Base C++ reaproveitada e atualizada conforme o original; sua implementação antiga não define o gameplay nem as capturas atuais. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\MikeAndDenyse` | Repositório Nightfall; referência Unity preservada em `NightfallUnity/` e port C++ em `NightfallNative/`. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAco_AndroidBuild` | Árvore auxiliar existente de build Android/Capacitor do Rua de Aço; não substitui a fonte canônica `RuaDeAco` nem o build nativo em `RuaDeAcoUnreal`. |
+| `D:\PROJETOS\SoftwaresSmellsLikeTech\RuaDeAco_AudioMasters` | Matrizes de áudio existentes (`music/`); preservar os originais. Não é uma fonte alternativa de gameplay. |
+
+Confirmar o Git de cada pasta antes de editar; estas pastas de jogos são projetos independentes dentro da raiz do portal, não novos submódulos nem assets estáticos a publicar. Capturas do site devem vir da versão indicada em execução e mostrar os lutadores atuais. Responsável: Codex.
+
 Última atualização: 2026-08-29 (v3.1 · repositório público)
 
 Memória permanente do projeto. Qualquer agente ou sessão nova começa por aqui.

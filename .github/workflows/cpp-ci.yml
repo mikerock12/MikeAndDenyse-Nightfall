@@ -12,6 +12,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Run Python Progress & LanIp Tests
         run: python tools/test_progress.py
@@ -30,3 +31,79 @@ jobs:
       - name: Run CTest (77 Smoke Checks + LAN UDP Loopback + Headless Smoke)
         working-directory: NightfallNative
         run: ctest --preset windows-msvc-release --output-on-failure -V
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Compare unchanged C# rules and maps with native replay
+        working-directory: NightfallNative
+        run: |
+          dotnet build tests/reference/NightfallReference.csproj -c Release --configfile tests/reference/NuGet.Config -o Saved/ReferenceRunner
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tests/compare_reference.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nightfall-parity-report
+          path: NightfallNative/Saved/reference-parity-report.json
+
+  build-android-frontend:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install pinned Android toolchain
+        shell: pwsh
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
+      - name: Build complete C++ ARM64 frontend and unsigned APK
+        shell: pwsh
+        working-directory: NightfallNative
+        run: ./Scripts/Build-NativeAndroid.ps1 -UnsignedOnly
+      - name: Build isolated x86_64 emulator QA app
+        shell: pwsh
+        working-directory: NightfallNative
+        run: ./Scripts/Build-NativeAndroid.ps1 -Abi x86_64 -QaDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nightfall-android-candidates
+          retention-days: 7
+          path: |
+            NightfallNative/Saved/Packages/Release-1.0.1/*arm64-v8a-UNSIGNED.apk
+            NightfallNative/Saved/Packages/Release-1.0.1/*x86_64-QA.apk
+
+  android-emulator-frontend:
+    needs: build-android-frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: nightfall-android-candidates
+          path: candidate
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise real native Android frontend
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_2
+          disable-animations: true
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -camera-back none
+          script: python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.0.1-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nightfall-android-emulator-evidence
+          retention-days: 7
+          path: NightfallNative/Saved/emulator-evidence

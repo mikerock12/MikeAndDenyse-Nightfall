@@ -1,5 +1,15 @@
 # Mike & Denyse: Nightfall
 
+## Port nativo C++ — candidato 1.0.1 (02/11/2026)
+
+`NightfallNative/` preserva o projeto Unity abaixo e usa o mesmo frontend C++20/raylib em Windows e Android. O candidato corrige o APK 1.0.0 que executava a simulação sem desenhar o jogo. Inclui menus por toque, multitouch, áudio, arte procedural derivada do original, progressão e cooperativo entre clientes nativos da mesma versão.
+
+Build/CTest local e comparação de 100.800 passos contra os fontes C# originais passaram. A renderização Windows gerou capturas reais dos 16 mundos. Isso não encerra a validação Android, o teste em dois aparelhos físicos ou a publicação: o candidato ainda depende desses registros e da assinatura de release existente.
+
+Comandos, escopo da comparação e limitações estão em [NightfallNative/docs/FIDELITY_REPAIR.md](NightfallNative/docs/FIDELITY_REPAIR.md).
+
+## Projeto Unity original
+
 Platformer cooperativo 2D para **Android**, com 16 fases e multiplayer local entre dois celulares na mesma rede Wi‑Fi.
 
 ![Tela-título](docs/screenshots/01-titulo.jpg)
