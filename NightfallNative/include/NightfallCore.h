@@ -156,6 +156,7 @@ namespace Nightfall
         static int Score;
         static int LastWorld;
 
+        static void SetStoragePath(const std::string& path);
         static void Load();
         static void Save();
         static bool CanPlay(int worldIndex);

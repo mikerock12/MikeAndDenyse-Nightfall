@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.0.0"
+    [string]$Version = "1.0.1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,13 +16,19 @@ if ($LASTEXITCODE -ne 0) { throw "Falha no ctest" }
 
 $StageDir = Join-Path $NativeRoot "Saved\Packages\WindowsStage"
 $OutDir = Join-Path $NativeRoot "Saved\Packages\Release-$Version"
-if (Test-Path $StageDir) { Remove-Item $StageDir -Recurse -Force }
+if (Test-Path $StageDir) {
+    $ResolvedStage = [IO.Path]::GetFullPath($StageDir)
+    $ExpectedPackages = [IO.Path]::GetFullPath((Join-Path $NativeRoot 'Saved/Packages')) + [IO.Path]::DirectorySeparatorChar
+    if (-not $ResolvedStage.StartsWith($ExpectedPackages,[StringComparison]::OrdinalIgnoreCase)) { throw 'Stage must remain within NightfallNative/Saved/Packages' }
+    Remove-Item -LiteralPath $ResolvedStage -Recurse -Force
+}
 New-Item -ItemType Directory -Force -Path $StageDir | Out-Null
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
 $ReleaseBin = Join-Path $NativeRoot "build\windows-msvc-release\Release"
 Copy-Item (Join-Path $ReleaseBin "NightfallNative.exe") (Join-Path $StageDir "NightfallNative.exe") -Force
 Copy-Item (Join-Path $ReleaseBin "raylib.dll") (Join-Path $StageDir "raylib.dll") -Force
+Copy-Item (Join-Path $NativeRoot 'ThirdParty/raylib/LICENSE') (Join-Path $StageDir 'LICENSE-raylib.txt') -Force
 
 $ArtSrc = Join-Path $RepoRoot "NightfallUnity\Assets\StreamingAssets\art"
 $ArtDst = Join-Path $StageDir "Content\art"

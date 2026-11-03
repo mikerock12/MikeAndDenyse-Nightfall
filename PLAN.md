@@ -470,3 +470,33 @@ Acrescentado na v3.0:
 14. Morrer mostra o painel com o mundo atrás; a tela nunca fica preta e travada
 15. No coop, o segundo celular vê coleta de item, projétil, corte, faísca e barra de chefe
 16. O título tem **Sair** e ele fecha o app de verdade
+
+
+## Rodada nativa de 02/11/2026
+
+- [x] Frontend C++ compartilhado no Android NativeActivity, sem loop JNI vazio.
+- [x] Paridade headless independente: 100.800 passos contra C# original e hashes dos 16 mapas.
+- [x] Multitouch, menus, progresso, áudio e arte procedural portados; wire LAN v3 explícito com ordenação.
+- [x] Windows /MT, PE auditado, instalação/restauração de 80 arquivos, renderização real dos 16 mundos e desinstalação isoladas.
+- [x] PR #2 e builds hospedados Windows/Android executados.
+- [x] Android emulado aprovado em 16:9 e 5:3, cada tela assertada, 77 assets e mesmo PID após background/retorno (CI 41588036821).
+- [x] Capturas finais revisadas: título/seleção/mapa, Mike/Denyse, movimento e pausa com proporção preservada.
+- [ ] Toque/áudio/atualização ARM64 físico e Wi-Fi em dois aparelhos (não disponíveis).
+- [x] APK final assinado v2/v3 com certificado publicado preservado e alinhamento 16 KiB; CI hospedado verde.
+- Publicação, merge, release e backup final: consolidação pelo coordenador nos arquivos de contexto do portal.
+
+Método, comandos e limites em `NightfallNative/docs/FIDELITY_REPAIR.md`. Responsável: Codex / agente Nightfall; coordenador consolida a entrega.
+
+## Empacotamento Android — 03/11/2026
+
+Identificada a causa comprovada dos assets ausentes no emulador: o aapt2 Windows gravava nomes ZIP com barras invertidas nos cabeçalhos locais e centrais. Python no Windows normalizava `ZipInfo.filename` durante a leitura, ocultando o defeito; Android e Linux preservam os nomes literais. O build agora normaliza `orig_filename` antes de alinhar/assinar e valida cabeçalhos, CRC, índice e todos os 77 PNG. Teste local no APK real detectou 78 entradas defeituosas e verificou a correção. Callbacks AAssetManager permanecem; CI Android 41588036821 e assinatura do APK final foram aprovados em 03/11. O coordenador registra a publicação. Responsável: Codex / agente Nightfall.
+
+## Superfície Android — 03/11/2026
+
+CI 41586931399 confirmou o índice de 77 assets e o título com arte original após normalizar o ZIP. O gate seguinte detectou escala vertical incorreta e menus inacessíveis: a raylib 5.5 combinava o tamanho lógico fixo com seu próprio escalonamento da superfície Android. O frontend passa a iniciar na resolução real da superfície (`InitWindow(0,0)` apenas Android), preservando o framebuffer de jogo 960×540 e seu viewport. A janela é configurada em paisagem antes de iniciar a thread nativa. QA passa a exigir o estado esperado em cada captura e sempre exportar logcat/Activity/Window quando falha. CI final 41588036821 aprovado nos três jobs em 03/11; registro de release/publicação pelo coordenador. Responsável: Codex / agente Nightfall.
+
+QA Android também executa o mesmo APK em superfícies 16:9 (960×540) e 5:3 (1000×600), limpando somente os dados do pacote descartável `.qa`, exigindo cada estado de menu e o mesmo PID após background/retorno. Ambos os percursos passaram no CI 41588036821, com 22 capturas e logs de evidência. Responsável: Codex / agente Nightfall.
+
+## Validação final da entrega 1.0.1 — 03/11/2026
+
+CI 41588036821 aprovado (Windows/100.800 comparações/Android e dois percursos emulados 16:9 e 5:3). Windows instalado e desinstalado isoladamente, 80 hashes e render dos 16 mundos aprovados; APK ARM64 assinado com identidade preservada. Detalhes e hashes em NightfallNative/docs/FIDELITY_REPAIR.md. Publicação e backup têm registro final nos contextos do portal pelo coordenador. Limites físicos descritos em AGENTS.md. Responsável: Codex / agente Nightfall.

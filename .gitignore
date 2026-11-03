@@ -82,6 +82,9 @@ NightfallUnity/.utmp/
 NightfallNative/build/
 NightfallNative/Saved/
 NightfallNative/DartConfiguration.tcl
+NightfallNative/tests/reference/bin/
+NightfallNative/tests/reference/obj/
+!NightfallNative/tests/reference/NightfallReference.csproj
 nightfall_progress.cfg
 *.exe
 *.zip

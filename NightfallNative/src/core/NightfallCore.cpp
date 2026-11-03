@@ -8,6 +8,9 @@
 #include <limits>
 #include <queue>
 #include <sstream>
+#include <array>
+#include <bit>
+#include <type_traits>
 
 namespace Nightfall
 {
@@ -893,9 +896,16 @@ namespace Nightfall
     int Progress::Score = 0;
     int Progress::LastWorld = 0;
 
+    namespace { std::string g_ProgressPath = "nightfall_progress.cfg"; }
+
+    void Progress::SetStoragePath(const std::string& path)
+    {
+        if (!path.empty()) g_ProgressPath = path;
+    }
+
     void Progress::Load()
     {
-        std::ifstream f("nightfall_progress.cfg");
+        std::ifstream f(g_ProgressPath);
         if (f.is_open())
         {
             f >> Unlocked >> Hero >> Souls >> Score >> LastWorld;
@@ -909,7 +919,7 @@ namespace Nightfall
 
     void Progress::Save()
     {
-        std::ofstream f("nightfall_progress.cfg", std::ios::trunc);
+        std::ofstream f(g_ProgressPath, std::ios::trunc);
         if (f.is_open())
         {
             f << Unlocked << " " << (Hero.empty() ? "mike" : Hero) << " " << Souls << " " << Score << " " << LastWorld << "\n";
@@ -991,10 +1001,6 @@ namespace Nightfall
         return 5;
     }
 
-    std::string LanIp::Pick()
-    {
-        return "192.168.1.100";
-    }
 
     // ───────────────────────────── FrameSnap ─────────────────────────────
 
@@ -1003,8 +1009,11 @@ namespace Nightfall
         template <typename TVal>
         void WriteVal(std::vector<uint8_t>& buf, const TVal& v)
         {
-            const uint8_t* p = reinterpret_cast<const uint8_t*>(&v);
-            buf.insert(buf.end(), p, p + sizeof(TVal));
+            static_assert(std::is_arithmetic_v<TVal>, "Wire values must be explicit scalar fields");
+            std::array<uint8_t,sizeof(TVal)> bytes{};
+            std::memcpy(bytes.data(),&v,sizeof(v));
+            if constexpr(std::endian::native==std::endian::big) std::reverse(bytes.begin(),bytes.end());
+            buf.insert(buf.end(),bytes.begin(),bytes.end());
         }
 
         void WriteStr(std::vector<uint8_t>& buf, const std::string& s, size_t maxLen)
@@ -1017,11 +1026,36 @@ namespace Nightfall
         template <typename TVal>
         bool ReadVal(const uint8_t*& cur, const uint8_t* end, TVal& v)
         {
+            static_assert(std::is_arithmetic_v<TVal>, "Wire values must be explicit scalar fields");
             if (static_cast<size_t>(end - cur) < sizeof(TVal)) return false;
-            std::memcpy(&v, cur, sizeof(TVal));
+            if constexpr(std::is_same_v<TVal,bool>) {
+                if(*cur>1)return false;
+                v=*cur!=0;
+            } else {
+                std::array<uint8_t,sizeof(TVal)> bytes{};
+                std::copy(cur,cur+sizeof(TVal),bytes.begin());
+                if constexpr(std::endian::native==std::endian::big) std::reverse(bytes.begin(),bytes.end());
+                std::memcpy(&v,bytes.data(),sizeof(TVal));
+                if constexpr(std::is_floating_point_v<TVal>) if(!std::isfinite(v)) return false;
+            }
             cur += sizeof(TVal);
             return true;
         }
+
+        void WriteVal(std::vector<uint8_t>& b,const Vec2& v) { WriteVal(b,v.x);WriteVal(b,v.y); }
+        bool ReadVal(const uint8_t*& c,const uint8_t* e,Vec2& v) { return ReadVal(c,e,v.x)&&ReadVal(c,e,v.y); }
+        void WriteVal(std::vector<uint8_t>& b,const PlrSnap& v) {
+            WriteVal(b,v.X);WriteVal(b,v.Y);WriteVal(b,v.Hp);WriteVal(b,v.MaxHp);WriteVal(b,v.Lives);WriteVal(b,v.Anim);WriteVal(b,v.Atk);WriteVal(b,v.Flags);WriteVal(b,v.Hero);
+        }
+        bool ReadVal(const uint8_t*& c,const uint8_t* e,PlrSnap& v) {
+            return ReadVal(c,e,v.X)&&ReadVal(c,e,v.Y)&&ReadVal(c,e,v.Hp)&&ReadVal(c,e,v.MaxHp)&&ReadVal(c,e,v.Lives)&&ReadVal(c,e,v.Anim)&&ReadVal(c,e,v.Atk)&&ReadVal(c,e,v.Flags)&&ReadVal(c,e,v.Hero);
+        }
+        void WriteVal(std::vector<uint8_t>& b,const EntSnap& v) { WriteVal(b,v.X);WriteVal(b,v.Y);WriteVal(b,v.Hp);WriteVal(b,v.Kind);WriteVal(b,v.Flags); }
+        bool ReadVal(const uint8_t*& c,const uint8_t* e,EntSnap& v) { return ReadVal(c,e,v.X)&&ReadVal(c,e,v.Y)&&ReadVal(c,e,v.Hp)&&ReadVal(c,e,v.Kind)&&ReadVal(c,e,v.Flags); }
+        void WriteVal(std::vector<uint8_t>& b,const ProjSnap& v) { WriteVal(b,v.X);WriteVal(b,v.Y);WriteVal(b,v.Vx);WriteVal(b,v.Vy);WriteVal(b,v.Kind);WriteVal(b,v.Flags); }
+        bool ReadVal(const uint8_t*& c,const uint8_t* e,ProjSnap& v) { return ReadVal(c,e,v.X)&&ReadVal(c,e,v.Y)&&ReadVal(c,e,v.Vx)&&ReadVal(c,e,v.Vy)&&ReadVal(c,e,v.Kind)&&ReadVal(c,e,v.Flags); }
+        void WriteVal(std::vector<uint8_t>& b,const FxSnap& v) { WriteVal(b,v.X);WriteVal(b,v.Y);WriteVal(b,v.Kind);WriteVal(b,v.Dir); }
+        bool ReadVal(const uint8_t*& c,const uint8_t* e,FxSnap& v) { return ReadVal(c,e,v.X)&&ReadVal(c,e,v.Y)&&ReadVal(c,e,v.Kind)&&ReadVal(c,e,v.Dir); }
 
         bool ReadStr(const uint8_t*& cur, const uint8_t* end, std::string& s)
         {
@@ -1038,6 +1072,7 @@ namespace Nightfall
     {
         std::vector<uint8_t> buf;
         buf.reserve(512);
+        buf.push_back(3); // Native wire v3: little-endian scalars, never C++ struct padding.
         WriteVal(buf, P0);
         WriteVal(buf, P1);
         WriteVal(buf, Score);
@@ -1070,7 +1105,8 @@ namespace Nightfall
 
     bool FrameSnap::Deserialize(const uint8_t* data, size_t len, FrameSnap& out)
     {
-        const uint8_t* cur = data;
+        if(!data || len<1 || data[0]!=3) return false;
+        const uint8_t* cur = data+1;
         const uint8_t* end = data + len;
         if (!ReadVal(cur, end, out.P0)) return false;
         if (!ReadVal(cur, end, out.P1)) return false;
@@ -1102,7 +1138,7 @@ namespace Nightfall
         if (!ReadVal(cur, end, nf) || nf < 0 || nf > MaxFx) return false;
         out.Fxs.resize(nf);
         for (int i = 0; i < nf; ++i) if (!ReadVal(cur, end, out.Fxs[i])) return false;
-        return true;
+        return cur==end;
     }
 
     // ───────────────────────────── GameSim ─────────────────────────────
@@ -1946,6 +1982,7 @@ namespace Nightfall
 
     void GameSim::ApplyNetEnemies(const std::vector<EntSnap>& ents)
     {
+        if (Enemies.size() > ents.size()) Enemies.resize(ents.size());
         for (size_t i = 0; i < ents.size(); ++i)
         {
             const auto& s = ents[i];
@@ -2078,11 +2115,16 @@ namespace Nightfall
         snap.Msg = Message;
         snap.MsgT = MessageT;
 
-        size_t ne = std::min<size_t>(FrameSnap::MaxEnts, Enemies.size());
+        std::vector<const EnemyA*> visible;
+        for (const auto& e : Enemies) if (!e.Dead) visible.push_back(&e);
+        std::stable_sort(visible.begin(), visible.end(), [this](const EnemyA* a, const EnemyA* b) {
+            return std::abs(a->X - (CamX + T::ViewW/2)) < std::abs(b->X - (CamX + T::ViewW/2));
+        });
+        size_t ne = std::min<size_t>(FrameSnap::MaxEnts, visible.size());
         snap.Ents.reserve(ne);
         for (size_t i = 0; i < ne; ++i)
         {
-            const auto& e = Enemies[i];
+            const auto& e = *visible[i];
             EntSnap es;
             es.X = e.X; es.Y = e.Y;
             es.Hp = static_cast<uint8_t>(std::max(0, e.Hp));
@@ -2117,6 +2159,8 @@ namespace Nightfall
     {
         EnsureSecond("denyse");
         auto unpackPlayer = [](PlayerA& p, const PlrSnap& s) {
+            const auto* hero = Catalog::Hero(s.Hero == 1 ? "denyse" : "mike");
+            if (hero) p.Hero = *hero;
             p.X = s.X; p.Y = s.Y;
             p.Hp = s.Hp; p.MaxHp = s.MaxHp; p.Lives = s.Lives;
             p.Anim = s.Anim == 1 ? "walk" : s.Anim == 2 ? "jump" : s.Anim == 3 ? "fall" : s.Anim == 4 ? "attack" : "idle";
@@ -2124,6 +2168,7 @@ namespace Nightfall
             p.HurtT = (s.Flags & 2) ? 0.2f : 0.0f;
             p.Dead = (s.Flags & 4) != 0;
             p.Facing = (s.Flags & 8) ? -1 : 1;
+            p.Atk = s.Atk == 0 ? 0.0f : std::max(0.001f, (1.0f-s.Atk/255.0f)*p.Hero.AtkTime);
         };
         if (!Players.empty()) unpackPlayer(Players[0], snap.P0);
         if (Players.size() >= 2) unpackPlayer(Players[1], snap.P1);
@@ -2137,6 +2182,19 @@ namespace Nightfall
         ApplyNetItems(snap.ItemMask);
         ApplyNetEnemies(snap.Ents);
         ApplyNetProjectiles(snap.Projs);
+        // The client never simulates boss activation or the Warden -> Belial transition.
+        Bosses.clear();
+        if (snap.BossMax > 0) {
+            const auto* definition = Catalog::BossAt(snap.BossKind);
+            if (definition) {
+                BossA boss;
+                boss.Id=definition->Id; boss.Def=*definition; boss.W=static_cast<float>(definition->W); boss.H=static_cast<float>(definition->H);
+                boss.X=snap.BossPos.x; boss.Y=snap.BossPos.y; boss.Hp=snap.BossHp; boss.MaxHp=snap.BossMax;
+                boss.Dead=(snap.BossFlags&1)!=0; boss.Facing=(snap.BossFlags&2)!=0 ? -1:1; boss.Dir=boss.Facing;
+                Bosses.push_back(boss);
+                BelialPhase=boss.Id=="belial";
+            }
+        }
         for (const auto& f : snap.Fxs)
         {
             Emit(static_cast<FxKind>(f.Kind), f.X, f.Y, f.Dir == 0 ? -1 : 1);

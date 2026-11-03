@@ -1,5 +1,6 @@
 #include "NightfallCore.h"
 #include "NightfallNet.h"
+#include "NativeWorldArt.h"
 #include "raylib.h"
 
 #include <algorithm>
@@ -11,10 +12,56 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <sstream>
+#include <cstdlib>
+#ifdef PLATFORM_ANDROID
+#include <android_native_app_glue.h>
+#include <android/asset_manager.h>
+extern "C" struct android_app* GetAndroidApp(void);
+#endif
 
 namespace
 {
     using namespace Nightfall;
+
+#ifdef PLATFORM_ANDROID
+    unsigned char* LoadAndroidAsset(const char* name,int* size)
+    {
+        *size=0;
+        AAssetManager* manager=GetAndroidApp()->activity->assetManager;
+        AAsset* asset=AAssetManager_open(manager,name,AASSET_MODE_STREAMING);
+        if(!asset) {
+            TraceLog(LOG_ERROR,"NIGHTFALL_ASSET: missing %s",name);
+            AAssetDir* dir=AAssetManager_openDir(manager,"art");
+            if(dir) {
+                const char* entry;
+                while((entry=AAssetDir_getNextFileName(dir))) TraceLog(LOG_ERROR,"NIGHTFALL_ASSET_DIR: art/%s",entry);
+                AAssetDir_close(dir);
+            }
+            return nullptr;
+        }
+        off64_t length=AAsset_getLength64(asset);
+        if(length<=0 || length>0x7fffffff) { AAsset_close(asset);return nullptr; }
+        auto data=static_cast<unsigned char*>(MemAlloc(static_cast<unsigned int>(length)));
+        int read=0;
+        while(data && read<length) {
+            int count=AAsset_read(asset,data+read,static_cast<size_t>(length-read));
+            if(count<=0)break;
+            read+=count;
+        }
+        AAsset_close(asset);
+        if(read!=length) { if(data)MemFree(data);return nullptr; }
+        *size=read;return data;
+    }
+    char* LoadAndroidAssetText(const char* name)
+    {
+        int size=0;auto data=LoadAndroidAsset(name,&size);
+        if(!data)return nullptr;
+        auto text=static_cast<char*>(MemAlloc(static_cast<unsigned int>(size+1)));
+        if(text) { std::memcpy(text,data,size);text[size]='\0'; }
+        MemFree(data);return text;
+    }
+#endif
 
     Color HexToColor(const std::string& hex, Color fallback = BLACK)
     {
@@ -37,13 +84,13 @@ namespace
             _sounds["jump"] = BuildTone(0.13f, 300.0f, 720.0f, WaveKind::Square, 0.16f, 0.0f);
             _sounds["attack"] = BuildNoise(0.10f, 0.20f, 0.55f);
             _sounds["magic"] = BuildTone(0.20f, 520.0f, 1180.0f, WaveKind::Sine, 0.18f, 14.0f);
-            _sounds["hit"] = BuildTone(0.09f, 220.0f, 130.0f, WaveKind::Square, 0.18f, 0.0f);
-            _sounds["stomp"] = BuildTone(0.12f, 150.0f, 70.0f, WaveKind::Square, 0.20f, 0.0f);
+            _sounds["hit"] = Mix(ToneSamples(0.09f,220,130,WaveKind::Square,0.16f,0),NoiseSamples(0.07f,0.14f,0.3f));
+            _sounds["stomp"] = Mix(ToneSamples(0.12f,150,70,WaveKind::Square,0.18f,0),NoiseSamples(0.09f,0.16f,0.2f));
             _sounds["hurt"] = BuildTone(0.26f, 420.0f, 110.0f, WaveKind::Saw, 0.20f, 6.0f);
             _sounds["die"] = BuildTone(0.70f, 330.0f, 55.0f, WaveKind::Saw, 0.22f, 4.0f);
             _sounds["coin"] = BuildArp({880.0f, 1320.0f}, 0.07f, 0.15f, WaveKind::Square);
             _sounds["heart"] = BuildArp({660.0f, 880.0f, 1100.0f}, 0.07f, 0.15f, WaveKind::Sine);
-            _sounds["boss"] = BuildTone(0.85f, 90.0f, 62.0f, WaveKind::Saw, 0.22f, 3.0f);
+            _sounds["boss"] = Mix(ToneSamples(0.85f,90,62,WaveKind::Saw,0.22f,3),NoiseSamples(0.5f,0.10f,0.12f));
             _sounds["clear"] = BuildArp({523.0f, 659.0f, 784.0f, 1046.0f}, 0.12f, 0.16f, WaveKind::Square);
             _sounds["ui"] = BuildTone(0.06f, 620.0f, 900.0f, WaveKind::Square, 0.10f, 0.0f);
         }
@@ -51,8 +98,15 @@ namespace
         void Play(const std::string& id)
         {
             if (!_ready) return;
+            double now=GetTime();
+            if(_lastPlayed.count(id) && now-_lastPlayed[id]<0.035) return;
+            _lastPlayed[id]=now;
             auto it = _sounds.find(id);
-            if (it != _sounds.end()) PlaySound(it->second);
+            if (it != _sounds.end()) {
+                SetSoundPitch(it->second,0.94f+GetRandomValue(0,120)/1000.0f);
+                SetSoundVolume(it->second,0.85f);
+                PlaySound(it->second);
+            }
         }
 
         void Shutdown()
@@ -69,6 +123,7 @@ namespace
         static constexpr int kRate = 22050;
         bool _ready = false;
         std::unordered_map<std::string, Sound> _sounds;
+        std::unordered_map<std::string, double> _lastPlayed;
 
         static float Osc(WaveKind w, float phase)
         {
@@ -100,7 +155,14 @@ namespace
             return s;
         }
 
-        static Sound BuildTone(float dur, float f0, float f1, WaveKind w, float vol, float vibrato)
+        static Sound BuildTone(float dur,float f0,float f1,WaveKind w,float vol,float vibrato) { return ToSound(ToneSamples(dur,f0,f1,w,vol,vibrato)); }
+        static Sound BuildNoise(float dur,float vol,float decay) { return ToSound(NoiseSamples(dur,vol,decay)); }
+        static Sound Mix(const std::vector<float>& a,const std::vector<float>& b) {
+            std::vector<float> mixed(std::max(a.size(),b.size()));
+            for(size_t i=0;i<mixed.size();++i) mixed[i]=std::clamp((i<a.size()?a[i]:0)+(i<b.size()?b[i]:0),-1.0f,1.0f);
+            return ToSound(mixed);
+        }
+        static std::vector<float> ToneSamples(float dur, float f0, float f1, WaveKind w, float vol, float vibrato)
         {
             int n = std::max(1, static_cast<int>(std::lrint(dur * kRate)));
             std::vector<float> data(n);
@@ -114,10 +176,10 @@ namespace
                 float env = std::min(1.0f, t * 18.0f) * std::pow(1.0f - t, 1.6f);
                 data[i] = Osc(w, phase) * env * vol;
             }
-            return ToSound(data);
+            return data;
         }
 
-        static Sound BuildNoise(float dur, float vol, float decay)
+        static std::vector<float> NoiseSamples(float dur, float vol, float decay)
         {
             int n = std::max(1, static_cast<int>(std::lrint(dur * kRate)));
             std::vector<float> data(n);
@@ -132,7 +194,7 @@ namespace
                 float env = std::min(1.0f, t * 30.0f) * std::pow(1.0f - t, 1.0f + decay * 4.0f);
                 data[i] = lp * env * vol;
             }
-            return ToSound(data);
+            return data;
         }
 
         static Sound BuildArp(std::initializer_list<float> notes, float each, float vol, WaveKind w)
@@ -161,66 +223,65 @@ namespace
     class NativeSpriteBank
     {
     public:
+        size_t AssetCount() const { return _paths.size(); }
         void LoadAll()
         {
+#ifdef PLATFORM_ANDROID
+            char* index = LoadFileText("art/index.txt");
+            if (index) {
+                std::istringstream lines(index);
+                std::string rel;
+                while (std::getline(lines, rel)) {
+                    if (!rel.empty() && rel.back() == '\r') rel.pop_back();
+                    if (!rel.empty()) _paths[std::filesystem::path(rel).stem().string()] = "art/" + rel;
+                }
+                UnloadFileText(index);
+            }
+#else
             std::vector<std::filesystem::path> roots = {
-                "Content/art",
-                "assets/art",
-                "../NightfallUnity/Assets/StreamingAssets/art",
-                "../../NightfallUnity/Assets/StreamingAssets/art",
-                "NightfallUnity/Assets/StreamingAssets/art"
+                std::filesystem::path(GetApplicationDirectory()) / "Content/art",
+                "Content/art", "assets/art", "../NightfallUnity/Assets/StreamingAssets/art",
+                "../../NightfallUnity/Assets/StreamingAssets/art", "NightfallUnity/Assets/StreamingAssets/art"
             };
-            std::filesystem::path foundRoot;
-            for (const auto& r : roots)
-            {
+            for (const auto& root : roots) {
                 std::error_code ec;
-                if (std::filesystem::exists(r, ec) && std::filesystem::is_directory(r, ec))
-                {
-                    foundRoot = r;
-                    break;
-                }
+                if (!std::filesystem::is_directory(root, ec)) continue;
+                for (const auto& e : std::filesystem::recursive_directory_iterator(root, ec))
+                    if (e.is_regular_file() && e.path().extension() == ".png")
+                        _paths[e.path().stem().string()] = e.path().string();
+                break;
             }
-            if (foundRoot.empty()) return;
-
-            std::error_code ec;
-            for (const auto& entry : std::filesystem::recursive_directory_iterator(foundRoot, ec))
-            {
-                if (!entry.is_regular_file()) continue;
-                auto p = entry.path();
-                if (p.extension() != ".png") continue;
-                std::string key = p.stem().string();
-                std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-
-                Image img = LoadImage(p.string().c_str());
-                if (img.data == nullptr) continue;
-                ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-                bool isBg = key.size() >= 3 && key.substr(key.size() - 3) == "_bg";
-                if (!isBg)
-                {
-                    Color* pixels = static_cast<Color*>(img.data);
-                    int count = img.width * img.height;
-                    for (int i = 0; i < count; ++i)
-                    {
-                        Color c = pixels[i];
-                        if (c.r > 180 && c.b > 180 && c.g < 160)
-                        {
-                            pixels[i] = Color{0, 0, 0, 0};
-                        }
-                    }
-                }
-                Texture2D tex = LoadTextureFromImage(img);
-                SetTextureFilter(tex, isBg ? TEXTURE_FILTER_BILINEAR : TEXTURE_FILTER_POINT);
-                UnloadImage(img);
-                _textures[key] = tex;
-            }
+#endif
+            TraceLog(LOG_INFO, "NIGHTFALL: indexed %d original sprite assets", static_cast<int>(_paths.size()));
         }
 
-        const Texture2D* Get(const std::string& key) const
+        const Texture2D* Get(const std::string& key)
         {
-            std::string k = key;
-            std::transform(k.begin(), k.end(), k.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            auto it = _textures.find(k);
-            return it != _textures.end() ? &it->second : nullptr;
+            auto loaded = _textures.find(key);
+            if (loaded != _textures.end()) return &loaded->second;
+            auto path = _paths.find(key);
+            if (path == _paths.end()) return nullptr;
+            Image img = LoadImage(path->second.c_str());
+            if (!img.data) return nullptr;
+            ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+            bool bg = key.size() >= 3 && key.substr(key.size() - 3) == "_bg";
+            if (!bg) {
+                Color* pixels = static_cast<Color*>(img.data);
+                for (int i = 0; i < img.width * img.height; ++i)
+                    if (pixels[i].r > 180 && pixels[i].b > 180 && pixels[i].g < 160)
+                        pixels[i] = Color{0,0,0,0};
+            }
+            // Decode original artwork lazily, cap GPU working set to the displayed resolution.
+            int limit = bg ? 1024 : 512;
+            if (img.width > limit || img.height > limit) {
+                float scale = limit / static_cast<float>(std::max(img.width, img.height));
+                ImageResizeNN(&img, std::max(1, static_cast<int>(img.width * scale)), std::max(1, static_cast<int>(img.height * scale)));
+            }
+            Texture2D texture = LoadTextureFromImage(img);
+            UnloadImage(img);
+            SetTextureFilter(texture, bg ? TEXTURE_FILTER_BILINEAR : TEXTURE_FILTER_POINT);
+            _textures[key] = texture;
+            return &_textures[key];
         }
 
         void UnloadAll()
@@ -231,6 +292,7 @@ namespace
 
     private:
         std::unordered_map<std::string, Texture2D> _textures;
+        std::unordered_map<std::string, std::string> _paths;
     };
 
     enum class ScreenMode
@@ -239,8 +301,28 @@ namespace
         HeroSelect,
         WorldMap,
         LobbyLan,
-        Playing
+        Playing,
+        Help
     };
+
+    Rectangle Viewport()
+    {
+        float scale = std::min(GetScreenWidth() / 960.0f, GetScreenHeight() / 540.0f);
+        return {(GetScreenWidth() - 960.0f * scale) / 2, (GetScreenHeight() - 540.0f * scale) / 2, 960.0f * scale, 540.0f * scale};
+    }
+
+    Vector2 CanvasPoint(Vector2 point, Rectangle viewport)
+    {
+        return {(point.x - viewport.x) * 960.0f / viewport.width, (point.y - viewport.y) * 540.0f / viewport.height};
+    }
+
+    void Button(Rectangle rect, const char* label, bool enabled = true)
+    {
+        DrawRectangleRounded(rect, 0.18f, 5, enabled ? Color{48,32,54,245} : Color{25,22,30,230});
+        DrawRectangleLinesEx(rect, 2, enabled ? GOLD : GRAY);
+        int size = 20;
+        DrawText(label, static_cast<int>(rect.x + (rect.width - MeasureText(label, size)) / 2), static_cast<int>(rect.y + (rect.height-size)/2), size, enabled ? RAYWHITE : GRAY);
+    }
 
     void DrawTexFitBottom(const Texture2D* tex, float x, float y, float w, float h, int facing, Color tint = WHITE)
     {
@@ -250,15 +332,19 @@ namespace
             return;
         }
         Rectangle src{0.0f, 0.0f, static_cast<float>(tex->width * (facing < 0 ? -1 : 1)), static_cast<float>(tex->height)};
-        Rectangle dst{x - w * 0.15f, y - h * 0.15f, w * 1.3f, h * 1.15f};
+        float scale=std::min(w/tex->width,h/tex->height);
+        float drawW=tex->width*scale,drawH=tex->height*scale;
+        Rectangle dst{x+(w-drawW)/2,y+h-drawH,drawW,drawH};
         DrawTexturePro(*tex, src, dst, Vector2{0.0f, 0.0f}, 0.0f, tint);
     }
 }
 
 int main(int argc, char** argv)
 {
+    std::string renderSmokeDirectory;
     for (int i = 1; i < argc; ++i)
     {
+        if(std::string(argv[i])=="--render-smoke" && i+1<argc) renderSmokeDirectory=argv[++i];
         if (std::string(argv[i]) == "--headless-smoke")
         {
             GameSim sim;
@@ -283,15 +369,48 @@ int main(int argc, char** argv)
         }
     }
 
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+    SetConfigFlags(renderSmokeDirectory.empty() ? FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT : FLAG_WINDOW_HIDDEN);
+#ifdef PLATFORM_ANDROID
+    // Use the actual Android surface size. raylib 5.5's fixed logical window
+    // path applies its own framebuffer scale in addition to our 16:9 target.
+    InitWindow(0, 0, "Mike & Denyse: Nightfall (C++20 Native)");
+#else
     InitWindow(T::ViewW, T::ViewH, "Mike & Denyse: Nightfall (C++20 Native)");
-    SetTargetFPS(60);
+#endif
+    SetTargetFPS(renderSmokeDirectory.empty()?60:0);
 
+    SetExitKey(KEY_NULL);
+#ifdef PLATFORM_ANDROID
+    Progress::SetStoragePath(std::string(GetAndroidApp()->activity->internalDataPath) + "/nightfall_progress.cfg");
+#else
+    const char* localData = std::getenv("LOCALAPPDATA");
+    if (localData) {
+        std::filesystem::path saveDir = std::filesystem::path(localData) / "SmellsLikeTech/Nightfall";
+        std::error_code ec;
+        std::filesystem::create_directories(saveDir, ec);
+        if (!ec) {
+            auto destination=saveDir / "nightfall_progress.cfg";
+            auto legacy=std::filesystem::path(GetApplicationDirectory()) / "nightfall_progress.cfg";
+            if(!std::filesystem::exists(destination,ec) && std::filesystem::exists(legacy,ec))
+                std::filesystem::copy_file(legacy,destination,std::filesystem::copy_options::none,ec);
+            Progress::SetStoragePath(destination.string());
+        }
+    }
+#endif
     Progress::Load();
     NativeSfxBank sfx;
-    sfx.Init();
+    if(renderSmokeDirectory.empty()) sfx.Init();
+    NativeWorldArt worldArt;
     NativeSpriteBank sprites;
+#ifdef PLATFORM_ANDROID
+    // Read compressed APK entries directly; avoid libc/funopen filename fallback.
+    SetLoadFileDataCallback(LoadAndroidAsset);
+    SetLoadFileTextCallback(LoadAndroidAssetText);
+#endif
     sprites.LoadAll();
+    if(!renderSmokeDirectory.empty() && sprites.AssetCount()!=77) {
+        TraceLog(LOG_ERROR,"Render smoke requires all 77 original assets"); CloseWindow(); return 3;
+    }
 
     GameSim sim;
     sim.Sfx = [&sfx](const std::string& id) { sfx.Play(id); };
@@ -303,7 +422,19 @@ int main(int argc, char** argv)
     std::string heroP2 = "denyse";
     bool twoPlayersLocal = false;
     bool paused = false;
+#ifdef PLATFORM_ANDROID
+    bool showTouchHud = true;
+#else
     bool showTouchHud = false;
+#endif
+    bool wantLan = false;
+    bool quit = false;
+    bool previousJump = false, previousAttack = false;
+    int previousTouches = 0;
+    bool resultSaved = false;
+    struct VisualFx { FxEvent event; float age; };
+    std::vector<VisualFx> visualFx;
+    std::vector<FxSnap> pendingNetworkFx;
     float netSnapTimer = 0.0f;
     InputMsg latestRemoteCtl{};
 
@@ -313,9 +444,9 @@ int main(int argc, char** argv)
         if (slot == 0)
         {
             Ctl c = touchCtl;
-            c.L = c.L || IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT);
-            c.R = c.R || IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT);
-            c.D = c.D || IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN);
+            c.L = c.L || IsKeyDown(KEY_A) || (!twoPlayersLocal && IsKeyDown(KEY_LEFT));
+            c.R = c.R || IsKeyDown(KEY_D) || (!twoPlayersLocal && IsKeyDown(KEY_RIGHT));
+            c.D = c.D || IsKeyDown(KEY_S) || (!twoPlayersLocal && IsKeyDown(KEY_DOWN));
             c.Jp = c.Jp || IsKeyPressed(KEY_W) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_K);
             c.Jn = c.Jn || IsKeyDown(KEY_W) || IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_Z) || IsKeyDown(KEY_K);
             c.Ap = c.Ap || IsKeyPressed(KEY_J) || IsKeyPressed(KEY_X) || IsKeyPressed(KEY_F) || IsKeyPressed(KEY_ENTER);
@@ -356,201 +487,168 @@ int main(int argc, char** argv)
 
     RenderTexture2D target = LoadRenderTexture(T::ViewW, T::ViewH);
     SetTextureFilter(target.texture, TEXTURE_FILTER_POINT);
+    int renderSmokeFrame=0;
+    if(!renderSmokeDirectory.empty()) {
+        std::filesystem::create_directories(renderSmokeDirectory);
+        sim.ReadCtl=[](int){return Ctl{};};
+        screen=ScreenMode::Playing;sim.Start(0,"mike","denyse",true);
+    }
+    ScreenMode loggedScreen=ScreenMode::Title;
+    bool loggedPause=false;
+    TraceLog(LOG_INFO,"NIGHTFALL_SCREEN: 0");
 
-    while (!WindowShouldClose())
+    while (!quit && !WindowShouldClose())
     {
-        float dt = std::min(GetFrameTime(), 1.0f / 20.0f);
+        float dt = renderSmokeDirectory.empty()?std::min(GetFrameTime(), 1.0f / 20.0f):1.0f/60;
+        Rectangle viewport = Viewport();
+        int tc = GetTouchPointCount();
+        Vector2 pointer = CanvasPoint(tc > 0 ? GetTouchPosition(0) : GetMousePosition(), viewport);
+        bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || (tc > 0 && previousTouches == 0);
+        previousTouches = tc;
+        auto click = [&](Rectangle rect) { return clicked && CheckCollisionPointRec(pointer, rect); };
+        bool confirm = IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+        bool back = IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACK) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) || click({820, 12, 124, 44});
+        auto leaveMatch = [&](ScreenMode dest) {
+            lan.Stop(); latestRemoteCtl = {}; touchCtl = {}; paused = false; screen = dest;
+        };
+        if (renderSmokeDirectory.empty() && !IsWindowFocused() && screen == ScreenMode::Playing) paused = true;
         if (IsKeyPressed(KEY_F4)) showTouchHud = !showTouchHud;
 
-        // Touch input mapping in viewport coordinates
+        // All held fingers contribute; jump/attack edges fire once, never every rendered frame.
         touchCtl = Ctl{};
-        int tc = GetTouchPointCount();
         if (tc > 0) showTouchHud = true;
-        if (showTouchHud && (tc > 0 || IsMouseButtonDown(MOUSE_LEFT_BUTTON)))
-        {
-            int points = std::max(tc, IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? 1 : 0);
-            for (int i = 0; i < points; ++i)
-            {
-                Vector2 raw = tc > 0 ? GetTouchPosition(i) : GetMousePosition();
-                float vx = raw.x * T::ViewW / std::max(1, GetScreenWidth());
-                float vy = raw.y * T::ViewH / std::max(1, GetScreenHeight());
-                if (vy > 380.0f)
-                {
-                    if (vx >= 20.0f && vx <= 95.0f) touchCtl.L = true;
-                    if (vx >= 105.0f && vx <= 180.0f) touchCtl.R = true;
-                    if (vx >= 740.0f && vx <= 835.0f) { touchCtl.Ap = true; }
-                    if (vx >= 845.0f && vx <= 940.0f) { touchCtl.Jp = true; touchCtl.Jn = true; }
-                }
+        if (screen == ScreenMode::Playing && !paused && sim.State == "play") {
+            int points = tc > 0 ? tc : (IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? 1 : 0);
+            for (int i = 0; i < points; ++i) {
+                Vector2 point = CanvasPoint(tc > 0 ? GetTouchPosition(i) : GetMousePosition(), viewport);
+                if (CheckCollisionPointCircle(point, {80,430},58)) touchCtl.L = true;
+                if (CheckCollisionPointCircle(point, {204,430},58)) touchCtl.R = true;
+                if (CheckCollisionPointCircle(point, {131,315},47)) touchCtl.D = true;
+                if (CheckCollisionPointCircle(point, {714,452},56)) touchCtl.Ap = true;
+                if (CheckCollisionPointCircle(point, {862,422},66)) touchCtl.Jn = true;
             }
         }
+        bool heldAttack = touchCtl.Ap;
+        touchCtl.Ap = heldAttack && !previousAttack;
+        touchCtl.Jp = touchCtl.Jn && !previousJump;
+        previousAttack = heldAttack; previousJump = touchCtl.Jn;
 
-        if (screen == ScreenMode::Title)
-        {
-            if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_J) || touchCtl.Jp || touchCtl.Ap)
-            {
-                sfx.Play("ui");
-                screen = ScreenMode::HeroSelect;
-            }
+        if (screen == ScreenMode::Title) {
+            if (confirm || click({300,300,360,52})) { wantLan = false; screen = ScreenMode::HeroSelect; sfx.Play("ui"); }
+            else if (click({300,362,360,52})) { wantLan = true; screen = ScreenMode::HeroSelect; sfx.Play("ui"); }
+            else if (click({300,424,170,48})) screen = ScreenMode::Help;
+            else if (back || click({490,424,170,48})) quit = true;
         }
-        else if (screen == ScreenMode::HeroSelect)
-        {
-            if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) { heroP1 = "mike"; heroP2 = "denyse"; sfx.Play("ui"); }
-            if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) { heroP1 = "denyse"; heroP2 = "mike"; sfx.Play("ui"); }
-            if (IsKeyPressed(KEY_TAB)) { twoPlayersLocal = !twoPlayersLocal; sfx.Play("ui"); }
-            if (IsKeyPressed(KEY_L))
-            {
-                sfx.Play("ui");
-                lan.StartClientListen();
-                screen = ScreenMode::LobbyLan;
-            }
-            if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_J))
-            {
-                Progress::Hero = heroP1;
-                Progress::Save();
-                sfx.Play("ui");
-                screen = ScreenMode::WorldMap;
-            }
+        else if (screen == ScreenMode::Help) {
+            if (back || confirm) screen = ScreenMode::Title;
         }
-        else if (screen == ScreenMode::LobbyLan)
-        {
+        else if (screen == ScreenMode::HeroSelect) {
+            if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT) || click({160,110,290,280})) heroP1 = "mike";
+            if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT) || click({500,110,290,280})) heroP1 = "denyse";
+            heroP2 = heroP1 == "mike" ? "denyse" : "mike";
+#ifndef PLATFORM_ANDROID
+            if (IsKeyPressed(KEY_TAB)) twoPlayersLocal = !twoPlayersLocal;
+#endif
+            if (confirm || click({300,452,360,58}) || IsKeyPressed(KEY_L)) {
+                Progress::Hero = heroP1; Progress::Save(); sfx.Play("ui");
+                if (wantLan || IsKeyPressed(KEY_L)) { lan.StartClientListen(); screen = ScreenMode::LobbyLan; }
+                else screen = ScreenMode::WorldMap;
+            }
+            if (back) screen = ScreenMode::Title;
+        }
+        else if (screen == ScreenMode::LobbyLan) {
             lan.TickDiscovery(static_cast<float>(GetTime()));
-            if (IsKeyPressed(KEY_H))
-            {
-                lan.StartHost("Nightfall Coop");
-                sfx.Play("ui");
+            if (IsKeyPressed(KEY_H) || click({100,150,280,54})) { lan.StartHost("Nightfall Coop"); sfx.Play("ui"); }
+            std::string clientHero; InputMsg lobbyInput{};
+            if (lan.IsHosting()) lan.PollHostInput(lobbyInput, clientHero);
+            if (IsKeyPressed(KEY_C) && !lan.Rooms().empty()) {
+                const auto& room = lan.Rooms().front(); lan.ConnectToHost(room.host, room.port, heroP1);
             }
-            if (IsKeyPressed(KEY_C) && !lan.Rooms().empty())
-            {
-                const auto& r = lan.Rooms().front();
-                lan.ConnectToHost(r.host, r.port, heroP1);
-                sfx.Play("ui");
-            }
-            if (IsKeyPressed(KEY_ENTER) && lan.IsHosting())
-            {
-                sim.Start(selectedWorld, heroP1, heroP2, true);
-                lan.SendStartMatch(selectedWorld, heroP1, heroP2);
-                screen = ScreenMode::Playing;
-            }
-            FrameSnap incomingSnap;
-            int startW = 0;
-            std::string hHero, cHero;
-            bool matchStarted = false;
-            if (lan.IsConnectedClient())
-            {
-                lan.PollClientSnapshot(incomingSnap, startW, hHero, cHero, matchStarted);
-                if (matchStarted)
-                {
-                    sim.Start(startW, hHero, cHero, true);
-                    screen = ScreenMode::Playing;
+            for (size_t i = 0; i < lan.Rooms().size() && i < 4; ++i)
+                if (click({100,230.0f + 52*i,760,44})) {
+                    const auto room = lan.Rooms()[i]; lan.ConnectToHost(room.host, room.port, heroP1); break;
                 }
+            if ((confirm || click({500,150,360,54})) && lan.IsHosting()) screen = ScreenMode::WorldMap;
+            FrameSnap incoming; int world=0; std::string hostHero, guestHero; bool started=false;
+            if (lan.IsConnectedClient()) {
+                lan.SendClientInput({});
+                lan.PollClientSnapshot(incoming, world, hostHero, guestHero, started);
+                if (started) { sim.Start(world,hostHero,guestHero,true); resultSaved=false; paused=false; screen=ScreenMode::Playing; }
             }
-            if (IsKeyPressed(KEY_ESCAPE))
-            {
-                lan.Stop();
-                screen = ScreenMode::HeroSelect;
-            }
+            if (back) { lan.Stop(); screen=ScreenMode::HeroSelect; }
         }
-        else if (screen == ScreenMode::WorldMap)
-        {
-            if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A))
-            {
-                selectedWorld = std::max(0, selectedWorld - 1);
-                sfx.Play("ui");
+        else if (screen == ScreenMode::WorldMap) {
+            if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) selectedWorld=std::max(0,selectedWorld-1);
+            if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) selectedWorld=std::min(15,selectedWorld+1);
+            bool start = confirm || click({300,474,360,54});
+            for(int i=0;i<16;++i) if(click({80.0f+(i%4)*205,85.0f+(i/4)*95,190,80})) {
+                if (i == selectedWorld && Progress::CanPlay(i)) start = true;
+                selectedWorld=i;
             }
-            if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D))
-            {
-                selectedWorld = std::min(15, selectedWorld + 1);
-                sfx.Play("ui");
+            if (lan.IsHosting()) { lan.TickDiscovery(static_cast<float>(GetTime())); std::string h; InputMsg c{}; lan.PollHostInput(c,h); }
+            if (start && Progress::CanPlay(selectedWorld)) {
+                sim.Start(selectedWorld,heroP1,heroP2,twoPlayersLocal||lan.IsHosting());
+                if(lan.IsHosting()) lan.SendStartMatch(selectedWorld,heroP1,heroP2);
+                resultSaved=false; paused=false; screen=ScreenMode::Playing; sfx.Play("ui");
             }
-            if (IsKeyPressed(KEY_U))
-            {
-                Progress::Unlocked = 16;
-                Progress::Save();
-                sfx.Play("clear");
-            }
-            if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_J))
-            {
-                if (Progress::CanPlay(selectedWorld))
-                {
-                    sfx.Play("ui");
-                    sim.Start(selectedWorld, heroP1, heroP2, twoPlayersLocal || lan.IsHosting());
-                    paused = false;
-                    screen = ScreenMode::Playing;
+            if(back) { lan.Stop(); screen=ScreenMode::HeroSelect; }
+        }
+        else if (screen == ScreenMode::Playing) {
+            if(back || IsKeyPressed(KEY_P) || click({16,10,78,46})) paused=!paused;
+            bool terminal=sim.State=="clear" || sim.State=="win" || sim.State=="dead";
+            if (paused || terminal) {
+                bool owner=!lan.IsConnectedClient();
+                if ((confirm || click({290,285,380,54})) && (paused || owner)) {
+                    if(paused) paused=false;
+                    else if(sim.State=="dead") { sim.Start(sim.WorldIndex,heroP1,heroP2,twoPlayersLocal||lan.IsHosting()); if(lan.IsHosting()) lan.SendStartMatch(sim.WorldIndex,heroP1,heroP2); resultSaved=false; }
+                    else { selectedWorld=std::min(15,sim.WorldIndex+1); screen=ScreenMode::WorldMap; }
                 }
+                else if(IsKeyPressed(KEY_M) || click({290,350,380,54})) leaveMatch(ScreenMode::WorldMap);
+                else if(click({290,415,380,54})) leaveMatch(ScreenMode::Title);
             }
-            if (IsKeyPressed(KEY_ESCAPE)) screen = ScreenMode::HeroSelect;
-        }
-        else if (screen == ScreenMode::Playing)
-        {
-            if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_P)) paused = !paused;
-            if (!paused)
-            {
-                if (lan.IsConnectedClient())
-                {
-                    Ctl localC = sim.ReadCtl(0);
-                    InputMsg msg{localC.L, localC.R, localC.D, localC.Jp, localC.Jn, localC.Ap};
-                    lan.SendClientInput(msg);
-                    FrameSnap snap;
-                    int sw = 0;
-                    std::string hh, ch;
-                    bool ms = false;
-                    if (lan.PollClientSnapshot(snap, sw, hh, ch, ms))
-                    {
-                        sim.ApplySnapshot(snap);
-                    }
+            if(!paused && screen==ScreenMode::Playing) {
+                if(lan.IsConnectedClient()) {
+                    Ctl c=sim.ReadCtl(0); lan.SendClientInput({c.L,c.R,c.D,c.Jp,c.Jn,c.Ap});
+                    FrameSnap snap; int world=sim.WorldIndex; std::string h,g; bool started=false;
+                    bool got=lan.PollClientSnapshot(snap,world,h,g,started);
+                    if(!lan.IsConnectedClient()) { leaveMatch(ScreenMode::HeroSelect); }
+                    if(started) { sim.Start(world,h,g,true); resultSaved=false; }
+                    if(got) sim.ApplySnapshot(snap);
                     sim.TickRemote(dt);
-                }
-                else
-                {
-                    if (lan.IsHosting())
-                    {
-                        lan.TickDiscovery(static_cast<float>(GetTime()));
-                        std::string cHero;
-                        InputMsg cInp{};
-                        if (lan.PollHostInput(cInp, cHero))
-                        {
-                            sim.EnsureSecond(cHero);
-                            latestRemoteCtl = cInp;
-                        }
+                } else {
+                    if(lan.IsHosting()) {
+                        lan.TickDiscovery(static_cast<float>(GetTime())); InputMsg input{}; std::string hero;
+                        if(lan.PollHostInput(input,hero)) { sim.EnsureSecond(hero); latestRemoteCtl=input; }
                     }
                     sim.Tick(dt);
-                    if (lan.IsHosting())
-                    {
-                        netSnapTimer += dt;
-                        if (netSnapTimer >= 0.05f)
-                        {
-                            netSnapTimer = 0.0f;
-                            lan.BroadcastSnapshot(sim.CaptureSnapshot());
-                            sim.Fx.clear();
-                        }
-                    }
                 }
-
-                if (sim.State == "clear" || sim.State == "win")
-                {
-                    Progress::OnClear(sim.WorldIndex);
-                    Progress::RememberRun(sim.Souls, sim.Score, heroP1);
-                    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE))
-                    {
-                        selectedWorld = std::min(15, sim.WorldIndex + 1);
-                        screen = ScreenMode::WorldMap;
-                    }
+                if((sim.State=="clear" || sim.State=="win") && !resultSaved && !lan.IsConnectedClient()) {
+                    Progress::OnClear(sim.WorldIndex); Progress::RememberRun(sim.Souls,sim.Score,heroP1); resultSaved=true;
                 }
-                else if (sim.State == "dead")
-                {
-                    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE))
-                    {
-                        sim.Start(sim.WorldIndex, heroP1, heroP2, twoPlayersLocal || lan.IsHosting());
-                    }
-                }
-            }
-            else
-            {
-                if (IsKeyPressed(KEY_M)) screen = ScreenMode::WorldMap;
             }
         }
 
-        // ───────────────────────────── Render to 960x540 Canvas ─────────────────────────────
+        if(screen!=loggedScreen) { TraceLog(LOG_INFO,"NIGHTFALL_SCREEN: %d",static_cast<int>(screen));loggedScreen=screen; }
+        if(paused!=loggedPause) { TraceLog(LOG_INFO,"NIGHTFALL_PAUSE: %d",paused?1:0);loggedPause=paused; }
+        for (auto& fx : visualFx) fx.age += dt;
+        visualFx.erase(std::remove_if(visualFx.begin(),visualFx.end(),[](const VisualFx& fx){return fx.age>0.4f;}),visualFx.end());
+        for(const auto& event:sim.Fx) {
+            if(visualFx.size()<160) visualFx.push_back({event,0});
+            if(lan.IsHosting() && pendingNetworkFx.size()<FrameSnap::MaxFx)
+                pendingNetworkFx.push_back({event.X,event.Y,event.Kind,static_cast<uint8_t>(event.Dir<0 ? 0:1)});
+        }
+        sim.Fx.clear();
+        if(lan.IsHosting() && screen==ScreenMode::Playing) {
+            // Keep the network alive while paused; guest sees the same frozen world and pause state.
+            if(paused) { InputMsg input{}; std::string hero; lan.PollHostInput(input,hero); }
+            netSnapTimer+=dt;
+            if(netSnapTimer>=0.05f) {
+                netSnapTimer=0; FrameSnap snapshot=sim.CaptureSnapshot(); snapshot.Fxs=pendingNetworkFx;
+                if(paused) snapshot.SimState="pause";
+                lan.BroadcastSnapshot(snapshot); pendingNetworkFx.clear();
+            }
+        }
+
         BeginTextureMode(target);
         if (screen == ScreenMode::Title)
         {
@@ -560,8 +658,10 @@ int main(int argc, char** argv)
             DrawRectangle(0, 0, T::ViewW, T::ViewH, Color{10, 6, 16, 150});
             DrawText("MIKE & DENYSE", 250, 120, 56, Color{230, 195, 110, 255});
             DrawText("NIGHTFALL", 335, 185, 48, Color{200, 70, 90, 255});
-            DrawText("16 Noites · Coop Local & LAN Wi-Fi · C++20 Native", 230, 260, 20, LIGHTGRAY);
-            DrawText("Pressione ENTER / ESPACO para iniciar", 280, 380, 22, YELLOW);
+            DrawText("16 noites - 32 monstros - 16 chefes - Belial", 245, 260, 20, LIGHTGRAY);
+            Button({300,300,360,52},"Um jogador");
+            Button({300,362,360,52},"Dois celulares - Wi-Fi LAN");
+            Button({300,424,170,48},"Controles"); Button({490,424,170,48},"Sair");
         }
         else if (screen == ScreenMode::HeroSelect)
         {
@@ -582,24 +682,35 @@ int main(int argc, char** argv)
                 DrawText(h->Title.c_str(), (int)card.x + 24, (int)card.y + 218, 18, LIGHTGRAY);
                 DrawText(TextFormat("HP: %d   Alcance: %d", h->Hp, h->Reach), (int)card.x + 24, (int)card.y + 245, 16, SKYBLUE);
             }
-            DrawText(TextFormat("[TAB] Modo Local: %s   |   [L] Sala Coop LAN Wi-Fi", twoPlayersLocal ? "2 JOGADORES (COOP)" : "1 JOGADOR (SOLO)"), 175, 425, 20, GOLD);
-            DrawText("[A/D] Trocar Heroi   |   [ENTER] Ir ao Mapa das 16 Noites", 205, 465, 20, WHITE);
+            DrawText(wantLan ? "Coop Wi-Fi: cada cacador joga no seu celular" : "Um jogador: toque no seu cacador", 250,415,20,GOLD);
+            Button({300,452,360,58},wantLan ? "Ir para sala Wi-Fi" : "Ir ao mapa");
+            Button({820,12,124,44},"Voltar");
+        }
+        else if(screen == ScreenMode::Help) {
+            ClearBackground({16,10,24,255});
+            DrawText("COMO ATRAVESSAR A NOITE",190,70,34,GOLD);
+            DrawText("Mike: espada e ataque corpo a corpo. Denyse: cristais e queda lenta.",90,145,21,WHITE);
+            DrawText("Toque: esquerda / direita / descer, GOLPE, PULO e II para pausar.",90,195,21,WHITE);
+            DrawText("Teclado: A/D andar, W/ESPACO pular, J/X atacar, ESC/P pausar.",90,245,21,WHITE);
+            DrawText("Venca o chefe e toque o sino. As 16 noites abrem em ordem.",90,295,21,WHITE);
+            DrawText("Coop: mesma rede Wi-Fi, criar sala e tocar a sala no outro celular.",90,345,21,WHITE);
+            DrawText("Controle: direcional, A para pular, X para atacar, B para voltar.",90,395,21,WHITE);
+            Button({820,12,124,44},"Voltar");
         }
         else if (screen == ScreenMode::LobbyLan)
         {
             ClearBackground(Color{14, 14, 24, 255});
             DrawText("SALA COOPERATIVA LAN WI-FI (UDP 47888 / 7777)", 160, 45, 28, GOLD);
             DrawText(TextFormat("IP Local Preferencial (LanIp.Pick): %s", LanIp::Pick().c_str()), 160, 95, 20, SKYBLUE);
-            DrawText(lan.IsHosting() ? "Status: HOSPEDANDO SALA (Pressione ENTER para iniciar a partida)" : "Status: PROCURANDO SALAS NA REDE LOCAL...", 160, 135, 20, GREEN);
-            DrawText("[H] Hospedar Sala   |   [C] Conectar na 1a Sala Encontrada   |   [ESC] Voltar", 160, 175, 18, LIGHTGRAY);
-
-            int ry = 230;
-            for (const auto& r : lan.Rooms())
-            {
-                DrawRectangle(160, ry, 640, 42, Color{32, 28, 48, 255});
-                DrawText(TextFormat("%s — %s:%d", r.name.c_str(), r.host.c_str(), r.port), 175, ry + 11, 20, WHITE);
-                ry += 50;
+            DrawText(lan.IsHosting() ? "Sala criada. O outro celular pode entrar." : lan.IsConnectedClient() ? "Conectado - aguardando o host iniciar" : "Procurando salas na mesma rede Wi-Fi...",100,115,21,GREEN);
+            Button({100,150,280,54},"Criar sala"); Button({500,150,360,54},"Escolher fase",lan.IsHosting());
+            int ry=230;
+            for(const auto& room:lan.Rooms()) {
+                if(ry>420) break;
+                Button({100,static_cast<float>(ry),760,44},TextFormat("Entrar: %s - %s",room.name.c_str(),room.host.c_str())); ry+=52;
             }
+            DrawText("Cada aparelho precisa de um heroi diferente. UDP 47888 / 7777.",100,485,19,LIGHTGRAY);
+            Button({820,12,124,44},"Voltar");
         }
         else if (screen == ScreenMode::WorldMap)
         {
@@ -618,7 +729,8 @@ int main(int argc, char** argv)
                 DrawText(TextFormat("Noite %d", i + 1), (int)box.x + 10, (int)box.y + 10, 18, unlocked ? GOLD : GRAY);
                 DrawText(worlds[i].Name.c_str(), (int)box.x + 10, (int)box.y + 36, 14, unlocked ? WHITE : DARKGRAY);
             }
-            DrawText("[Setas/A/D] Escolher Noite  |  [ENTER] Jogar  |  [U] Desbloquear Todas  |  [ESC] Voltar", 95, 485, 18, LIGHTGRAY);
+            Button({300,474,360,54},"Comecar a fase",Progress::CanPlay(selectedWorld));
+            Button({820,12,124,44},"Voltar");
         }
         else if (screen == ScreenMode::Playing && sim.HasLevel)
         {
@@ -628,15 +740,8 @@ int main(int argc, char** argv)
             Color lipColor = HexToColor(sim.Level.World.Lip, Color{110, 130, 70, 255});
             ClearBackground(skyColor);
 
-            const Texture2D* bg = sprites.Get(sim.Level.World.Id + "_bg");
-            if (bg)
-            {
-                DrawTexturePro(*bg, Rectangle{0, 0, (float)bg->width, (float)bg->height}, Rectangle{0, 0, T::ViewW, T::ViewH}, Vector2{0, 0}, 0.0f, Color{200, 200, 200, 190});
-            }
-            else
-            {
-                DrawRectangleGradientV(0, 0, T::ViewW, T::ViewH, skyColor, fogColor);
-            }
+            worldArt.Prepare(sim.Level.World,sim.WorldIndex);
+            worldArt.DrawSky(sim.CamX,sim.Level.Cols,sprites.Get(sim.Level.World.Id+"_bg"));
 
             float camX = sim.CamX + (sim.Shake > 0.1f ? std::sin(sim.Time * 60.0f) * sim.Shake * 0.4f : 0.0f);
             float camY = sim.CamY;
@@ -652,53 +757,28 @@ int main(int argc, char** argv)
                     if (t == T::Empty) continue;
                     float sx = x * T::Tile - camX;
                     float sy = y * T::Tile - camY;
-                    if (t == T::Solid || t == T::Break)
-                    {
-                        DrawRectangle((int)sx, (int)sy, T::Tile, T::Tile, groundColor);
-                        if (y > 0 && sim.Level.Tiles[y - 1][x] == T::Empty)
-                            DrawRectangle((int)sx, (int)sy, T::Tile, 6, lipColor);
-                    }
-                    else if (t == T::Platform)
-                    {
-                        DrawRectangle((int)sx, (int)sy, T::Tile, 10, lipColor);
-                    }
-                    else if (t == T::Ice)
-                    {
-                        DrawRectangle((int)sx, (int)sy, T::Tile, T::Tile, Color{150, 215, 240, 255});
-                    }
-                    else if (t == T::Bounce)
-                    {
-                        DrawRectangle((int)sx, (int)sy, T::Tile, 12, Color{240, 190, 70, 255});
-                    }
-                    else if (t == T::Ladder)
-                    {
-                        DrawRectangle((int)sx + 10, (int)sy, 4, T::Tile, Color{160, 115, 65, 255});
-                        DrawRectangle((int)sx + 26, (int)sy, 4, T::Tile, Color{160, 115, 65, 255});
-                        for (int ry = 4; ry < T::Tile; ry += 10)
-                            DrawRectangle((int)sx + 10, (int)sy + ry, 20, 3, Color{190, 145, 85, 255});
-                    }
-                    else if (t == T::Lava)
-                    {
-                        DrawRectangle((int)sx, (int)sy + 6, T::Tile, T::Tile - 6, Color{230, 70, 20, 240});
-                    }
-                    else if (t == T::Water)
-                    {
-                        DrawRectangle((int)sx, (int)sy + 6, T::Tile, T::Tile - 6, Color{40, 110, 180, 190});
-                    }
-                    else if (t == T::Spike || t == T::Thorn)
-                    {
-                        Color hc = t == T::Thorn ? Color{90, 150, 60, 255} : Color{200, 200, 215, 255};
-                        for (int k = 0; k < 4; ++k)
-                        {
-                            float bx = sx + k * 10.0f;
-                            DrawTriangle(Vector2{bx + 5.0f, sy + 10.0f}, Vector2{bx, sy + T::Tile}, Vector2{bx + 10.0f, sy + T::Tile}, hc);
-                        }
-                    }
+                    int above=y>0?sim.Level.Tiles[y-1][x]:0;
+                    bool exposed=!(above==T::Solid||above==T::Ice||above==T::Break||above==t);
+                    worldArt.Tile(t,exposed,x,y,sim.Level.Rows,camX,camY,sim.Time);
                 }
             }
 
-            // Golden Exit Bell
-            DrawCircle((int)(sim.Level.Exit.x + 16 - camX), (int)(sim.Level.Exit.y + 16 - camY), 16.0f, GOLD);
+            worldArt.Decor(sim.Level,camX,camY,sim.Time);
+            // The exit bell appears after the arena boss has fallen, as in the original.
+            bool bossAlive=false;
+            for(const auto& boss:sim.Bosses) if(!boss.Dead) bossAlive=true;
+            if(sim.LockedArena && !bossAlive && (sim.WorldIndex!=15 || sim.BelialPhase)) {
+                float x=sim.Level.Exit.x+16-camX, y=sim.Level.Exit.y+16-camY;
+                DrawCircle(static_cast<int>(x),static_cast<int>(y),23,Fade(GOLD,0.2f));
+                DrawRectangle(static_cast<int>(x-11),static_cast<int>(y-12),22,22,GOLD);
+                DrawEllipse(static_cast<int>(x),static_cast<int>(y+11),16,5,GOLD);
+                DrawCircle(static_cast<int>(x),static_cast<int>(y+14),3,WHITE);
+            }
+            if(sim.Level.HasCheck) {
+                float x=sim.Level.Check.x-camX, y=sim.Level.Check.y-camY;
+                DrawRectangle(static_cast<int>(x),static_cast<int>(y-46),3,46,GOLD);
+                DrawTriangle({x+3,y-45},{x+3,y-23},{x+29,y-34},SKYBLUE);
+            }
 
             // Items
             for (const auto& it : sim.Items)
@@ -714,8 +794,9 @@ int main(int argc, char** argv)
             {
                 if (e.Dead) continue;
                 const Texture2D* tex = sprites.Get(e.Id);
-                Color tint = e.Flash > 0.0f ? RED : WHITE;
-                DrawTexFitBottom(tex, e.X - camX, e.Y - camY, e.W, e.H, e.Facing, tint);
+                Color tint = e.Flash > 0.0f ? Color{255,220,200,255} : WHITE;
+                DrawEllipse(static_cast<int>(e.X+e.W/2-camX),static_cast<int>(e.Y+e.H-camY),e.W*.65f,5,Color{0,0,0,85});
+                DrawTexFitBottom(tex, e.X - 8 - camX, e.Y - 10 - camY, e.W+16, e.H+12, e.Facing, tint);
             }
 
             // Bosses
@@ -724,7 +805,8 @@ int main(int argc, char** argv)
                 if (b.Dead) continue;
                 const Texture2D* tex = sprites.Get(b.Id);
                 Color tint = b.Flash > 0.0f ? RED : WHITE;
-                DrawTexFitBottom(tex, b.X - camX, b.Y - camY, b.W, b.H, b.Facing, tint);
+                DrawEllipse(static_cast<int>(b.X+b.W/2-camX),static_cast<int>(b.Y+b.H-camY),b.W*.65f,5,Color{0,0,0,85});
+                DrawTexFitBottom(tex, b.X - 8 - camX, b.Y - 10 - camY, b.W+16, b.H+12, b.Facing, tint);
             }
 
             // Players
@@ -734,27 +816,67 @@ int main(int argc, char** argv)
                 std::string key = p.Hero.Id + "_idle";
                 if (p.Anim == "attack") key = p.Hero.Id + "_attack";
                 else if (p.Anim == "jump" || p.Anim == "fall") key = p.Hero.Id + "_jump";
-                else if (p.Anim == "walk") key = p.Hero.Id + ((static_cast<int>(p.AnimT * 8.0f) % 2 == 0) ? "_walk1" : "_walk2");
+                else if (p.Anim == "walk") key = p.Hero.Id + ((static_cast<int>(p.AnimT * 7.0f) % 2 == 0) ? "_walk1" : "_walk2");
                 const Texture2D* tex = sprites.Get(key);
                 Color tint = (p.Inv > 0.0f && (static_cast<int>(p.Inv * 20.0f) % 2 == 0)) ? Color{255, 255, 255, 140} : WHITE;
-                DrawTexFitBottom(tex, p.X - camX, p.Y - camY, p.W, p.H, p.Facing, tint);
+                DrawEllipse(static_cast<int>(p.X+p.W/2-camX),static_cast<int>(p.Y+p.H-camY),p.W*.65f,5,Color{0,0,0,85});
+                float bob=p.Anim=="idle" ? std::sin(sim.Time*3)*1.2f:0;
+                DrawTexFitBottom(tex, p.X - 14 - camX, p.Y - 16 + bob - camY, p.W+28, p.H+18, p.Facing, tint);
+                if(p.Atk>0) {
+                    float t=std::max(0.0f,std::min(1.0f,1-p.Atk/std::max(0.01f,p.Hero.AtkTime)));
+                    Vector2 center{p.X+p.W/2-camX,p.Y+p.H*0.46f-camY};
+                    if(p.Hero.AtkKind=="magic") {
+                        DrawCircleLines(static_cast<int>(center.x+p.Facing*20),static_cast<int>(center.y),8+20*(1-t),Fade(SKYBLUE,1-t));
+                    } else {
+                        float angle=(-1.22f+t*2.44f);
+                        Vector2 tip{center.x+std::cos(angle)*p.Hero.Reach*p.Facing,center.y+std::sin(angle)*p.Hero.Reach};
+                        for(int trail=0;trail<3;++trail) {
+                            float a=angle-trail*0.18f;
+                            Vector2 end{center.x+std::cos(a)*p.Hero.Reach*p.Facing,center.y+std::sin(a)*p.Hero.Reach};
+                            DrawLineEx(center,end,static_cast<float>(6-trail),Fade(GOLD,(1-t)*(1-trail*0.22f)));
+                        }
+                        DrawCircleV(tip,4,WHITE);
+                    }
+                }
             }
 
             // Projectiles
             for (const auto& pr : sim.Projectiles)
             {
                 Color pc = pr.Friendly ? SKYBLUE : ORANGE;
-                DrawCircle((int)(pr.X + pr.W * 0.5f - camX), (int)(pr.Y + pr.H * 0.5f - camY), pr.W * 0.5f, pc);
+                Vector2 center{pr.X+pr.W*0.5f-camX,pr.Y+pr.H*0.5f-camY};
+                for(int trail=4;trail>=1;--trail) DrawCircleV({center.x-pr.Vx*trail*0.8f,center.y-pr.Vy*trail*0.8f},pr.W*0.5f*(1-trail*0.15f),Fade(pc,0.12f*(5-trail)));
+                DrawCircleV(center,pr.W*0.5f,pc); DrawCircleV(center,3,WHITE);
+            }
+            for(const auto& fx:visualFx) {
+                float t=fx.age/0.4f;
+                Vector2 center{fx.event.X-camX,fx.event.Y-camY};
+                Color color=fx.event.Kind==static_cast<uint8_t>(FxKind::Heal) ? GREEN : fx.event.Kind==static_cast<uint8_t>(FxKind::Rescue) ? SKYBLUE : GOLD;
+                DrawCircleLines(static_cast<int>(center.x),static_cast<int>(center.y),4+35*t,Fade(color,1-t));
+                for(int k=0;k<6;++k) {
+                    float a=k*1.0472f+fx.event.Kind;
+                    Vector2 spark{center.x+std::cos(a)*45*t,center.y+std::sin(a)*35*t};
+                    DrawCircleV(spark,3*(1-t),Fade(color,1-t));
+                }
             }
 
-            // HUD
-            DrawRectangle(12, 10, 310, 58, Color{0, 0, 0, 150});
-            if (!sim.Players.empty())
-            {
-                const auto& p0 = sim.Players[0];
-                DrawText(TextFormat("%s  HP: %d/%d  Vidas: %d", p0.Hero.Name.c_str(), p0.Hp, p0.MaxHp, p0.Lives), 22, 18, 18, WHITE);
-                DrawText(TextFormat("Almas: %d   Pontos: %d   Noite %d/16", sim.Souls, sim.Score, sim.WorldIndex + 1), 22, 42, 16, GOLD);
+            // Original two-player HUD: independent hearts and lives, shared souls/score.
+            for(size_t slot=0;slot<sim.Players.size() && slot<2;++slot) {
+                const auto& player=sim.Players[slot];
+                float x=slot==0 ? 106.f:714.f;
+                DrawRectangleRec({x,12,232,52},Color{8,3,8,158});
+                DrawRectangleRec({x,12,232,2},Color{212,181,107,140});
+                DrawCircle(static_cast<int>(x+13),25,5,slot==0 ? GOLD:SKYBLUE);
+                DrawText(TextFormat("P%d  %s",static_cast<int>(slot)+1,player.Hero.Name.c_str()),static_cast<int>(x+24),17,15,Color{230,209,158,255});
+                for(int hp=0;hp<player.MaxHp && hp<10;++hp) worldArt.Heart(x+24+hp*19,36,hp<player.Hp);
+                for(int life=0;life<std::clamp(player.Lives,0,5);++life) DrawCircle(static_cast<int>(x+200-life*10),45,3.5f,GOLD);
+                if(player.Dead)DrawText("CAIDO",static_cast<int>(x+24),36,15,RED);
             }
+            DrawRectangle(350,12,300,26,Color{8,3,8,140});
+            DrawText(TextFormat("Almas: %d",sim.Souls),362,18,15,Color{212,189,255,255});
+            DrawText(TextFormat("%d pts",sim.Score),500,18,15,GOLD);
+            std::string worldLabel=std::to_string(sim.WorldIndex+1)+" / 16 - "+sim.Level.World.Name;
+            DrawText(worldLabel.c_str(),(960-MeasureText(worldLabel.c_str(),13))/2,45,13,Color{184,163,140,255});
 
             for (const auto& b : sim.Bosses)
             {
@@ -771,44 +893,45 @@ int main(int argc, char** argv)
                 DrawText(sim.Message.c_str(), 240, 106, 22, GOLD);
             }
 
-            if (showTouchHud)
-            {
-                DrawRectangleRounded(Rectangle{20, 420, 75, 75}, 0.25f, 6, Color{255, 255, 255, 70});
-                DrawText("<", 48, 442, 32, WHITE);
-                DrawRectangleRounded(Rectangle{105, 420, 75, 75}, 0.25f, 6, Color{255, 255, 255, 70});
-                DrawText(">", 133, 442, 32, WHITE);
-                DrawRectangleRounded(Rectangle{740, 420, 95, 75}, 0.25f, 6, Color{220, 80, 80, 90});
-                DrawText("ATK", 762, 446, 24, WHITE);
-                DrawRectangleRounded(Rectangle{845, 420, 95, 75}, 0.25f, 6, Color{80, 160, 230, 90});
-                DrawText("PULO", 862, 446, 22, WHITE);
+            worldArt.Weather(sim.Level.World.Id,sim.Time);
+            worldArt.Atmosphere();
+            if (showTouchHud) {
+                auto pad=[](Vector2 c,float radius,const char* label,bool held) {
+                    DrawCircleV(c,radius,held ? Color{150,110,60,160}:Color{10,5,18,115});
+                    DrawCircleLines(static_cast<int>(c.x),static_cast<int>(c.y),radius,GOLD);
+                    DrawText(label,static_cast<int>(c.x-MeasureText(label,21)/2),static_cast<int>(c.y-10),21,WHITE);
+                };
+                pad({80,430},58,"<",touchCtl.L); pad({204,430},58,">",touchCtl.R);
+                pad({131,315},47,"v",touchCtl.D); pad({714,452},56,"GOLPE",heldAttack); pad({862,422},66,"PULO",touchCtl.Jn);
             }
-
-            if (sim.State == "clear" || sim.State == "win")
-            {
-                DrawRectangle(0, 0, T::ViewW, T::ViewH, Color{0, 0, 0, 180});
-                DrawText(sim.State == "win" ? "BELIAL DERROTADO! VITORIA FINAL!" : "NOITE CONCLUIDA!", 230, 210, 34, GOLD);
-                DrawText("Pressione ENTER para avancar no Mapa", 275, 270, 22, WHITE);
-            }
-            else if (sim.State == "dead")
-            {
-                DrawRectangle(0, 0, T::ViewW, T::ViewH, Color{30, 0, 0, 190});
-                DrawText("VOCE CAIU NA ESCURIDAO", 265, 210, 34, RED);
-                DrawText("Pressione ENTER para tentar novamente", 270, 270, 22, WHITE);
-            }
-            else if (paused)
-            {
-                DrawRectangle(0, 0, T::ViewW, T::ViewH, Color{0, 0, 0, 170});
-                DrawText("PAUSADO ([ESC] Continuar  |  [M] Mapa)", 260, 250, 24, WHITE);
+            Button({16,10,78,46},"II");
+            if(sim.Fade>0) DrawRectangle(0,0,960,540,Fade(BLACK,std::min(1.0f,sim.Fade)));
+            if(paused || sim.State=="pause" || sim.State=="dead" || sim.State=="clear" || sim.State=="win") {
+                DrawRectangle(0,0,960,540,Color{10,0,15,195});
+                const char* title=paused || sim.State=="pause" ? "PAUSADO" : sim.State=="dead" ? "OS CACADORES CAIRAM" : sim.State=="win" ? "BELIAL DERROTADO!" : "NOITE CONCLUIDA";
+                DrawText(title,(960-MeasureText(title,34))/2,210,34,GOLD);
+                bool owner=!lan.IsConnectedClient();
+                Button({290,285,380,54},paused ? "Continuar" : sim.State=="dead" ? "Renascem" : "Proxima noite",paused||owner);
+                Button({290,350,380,54},"Voltar ao mapa"); Button({290,415,380,54},"Menu inicial");
             }
         }
         EndTextureMode();
+        if(!renderSmokeDirectory.empty() && ++renderSmokeFrame%180==0) {
+            Image image=LoadImageFromTexture(target.texture);ImageFlipVertical(&image);
+            auto path=std::filesystem::path(renderSmokeDirectory)/("native-"+sim.Level.World.Id+".png");
+            if(!ExportImage(image,path.string().c_str())) { UnloadImage(image); return 4; }
+            UnloadImage(image);
+            int next=sim.WorldIndex+1;
+            if(next<16) sim.Start(next,"mike","denyse",true);
+            else { TraceLog(LOG_INFO,"NIGHTFALL_RENDER_SMOKE_OK worlds=16 assets=77");quit=true; }
+        }
 
         BeginDrawing();
         ClearBackground(BLACK);
         DrawTexturePro(
             target.texture,
             Rectangle{0.0f, 0.0f, static_cast<float>(target.texture.width), -static_cast<float>(target.texture.height)},
-            Rectangle{0.0f, 0.0f, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())},
+            viewport,
             Vector2{0.0f, 0.0f},
             0.0f,
             WHITE
@@ -817,6 +940,7 @@ int main(int argc, char** argv)
     }
 
     UnloadRenderTexture(target);
+    worldArt.Unload();
     sprites.UnloadAll();
     sfx.Shutdown();
     CloseWindow();

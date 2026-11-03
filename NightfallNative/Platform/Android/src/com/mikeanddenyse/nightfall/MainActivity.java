@@ -1,69 +1,46 @@
 package com.mikeanddenyse.nightfall;
-
-import android.app.Activity;
+import android.app.NativeActivity;
 import android.os.Bundle;
-import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.Window;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.net.wifi.WifiManager;
+import android.view.View;
 import android.view.WindowManager;
-
-public class MainActivity extends Activity implements SurfaceHolder.Callback {
-    static {
-        System.loadLibrary("nightfall");
-    }
-
-    private static native void nativeInit();
-    private static native void nativeStep(float dt);
-    private static native void nativeTouch(int action, float normX, float normY);
-
-    private SurfaceView surfaceView;
-    private volatile boolean running = false;
-    private Thread gameThread;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-        );
-        surfaceView = new SurfaceView(this);
-        surfaceView.getHolder().addCallback(this);
-        setContentView(surfaceView);
-        nativeInit();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        int w = Math.max(1, surfaceView.getWidth());
-        int h = Math.max(1, surfaceView.getHeight());
-        nativeTouch(event.getActionMasked(), event.getX() / w, event.getY() / h);
-        return true;
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        running = true;
-        gameThread = new Thread(() -> {
-            while (running) {
-                nativeStep(1.0f / 60.0f);
-                try {
-                    Thread.sleep(16);
-                } catch (InterruptedException ignored) {
-                    break;
-                }
+import android.util.Log;
+import java.io.IOException;
+/** The complete C++ frontend owns rendering, input and audio. */
+public class MainActivity extends NativeActivity {
+    private WifiManager.MulticastLock discoveryLock;
+    @Override public void onCreate(Bundle state) {
+        // Configure the window before NativeActivity starts the C++ thread.
+        // A late fullscreen/layout transition can leave the first EGL surface
+        // in portrait dimensions while the Activity is already landscape.
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        super.onCreate(state);
+        try {
+            String[] files = getAssets().list("art");
+            Log.i("NightfallAssets", "Java art entries: " + java.util.Arrays.toString(files));
+            try (java.io.InputStream index = getAssets().open("art/index.txt")) {
+                Log.i("NightfallAssets", "Java index first byte: " + index.read());
             }
-        }, "NightfallLoop");
-        gameThread.start();
+        } catch (IOException error) { Log.e("NightfallAssets", "APK assets inaccessible", error); }
+        WifiManager wifi = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        if (wifi != null) {
+            discoveryLock = wifi.createMulticastLock("nightfall-discovery");
+            discoveryLock.setReferenceCounted(false);
+        }
     }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        running = false;
+    @Override protected void onResume() {
+        super.onResume();
+        if (discoveryLock != null && !discoveryLock.isHeld()) discoveryLock.acquire();
+    }
+    @Override protected void onPause() {
+        if (discoveryLock != null && discoveryLock.isHeld()) discoveryLock.release();
+        super.onPause();
     }
 }

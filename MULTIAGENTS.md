@@ -268,3 +268,28 @@ O projeto não tinha git: o `.git` em `D:\PROJETOS` era uma pasta vazia, não um
   IPv4 do Wi-Fi, e não o dos dados móveis.
 - `LICENSE`: **todos os direitos reservados** ao autor. Repositório público para leitura;
   nenhuma licença de uso concedida.
+
+
+### 2026-11-02 — agente Nightfall / correção da publicação nativa
+
+- Reutilizou o core C++ existente e preservou Unity/WebView. NativeActivity agora usa o mesmo frontend raylib do Windows, com menus por toque, pads multitouch, audio e atlas original portado, save privado e LAN nativo versionado.
+- Corrigiu IPv4 falso, recebimento incompleto de chefe/Belial, roster fantasma, ataques remotos, retransmissão de início/retry, ordenação de snapshots e drenagem de FX.
+- Compilou três fontes C# originais inalterados com adaptador MathF/RNG controlado: 100.800 passos e 16 hashes de mapa passaram com erro máximo de 0,00024 (tolerância 0,001). Isso não executa o renderizador nem o RNG Unity.
+- Windows real: instalador /CURRENTUSER isolado, 80 arquivos iguais ao ZIP, headless e render dos 16 mundos, uninstall exit0; runtime /MT e imports PE sem MSVCP/VCRUNTIME.
+- CI real revelou tutorial fullscreen e, depois dele, assets zero apesar dos 77 PNG no APK. Corrigiu leitura do aplicativo via callbacks AAssetManager diretos; não reduziu as assertions. PR #2 coordena a entrega; QA Android final aprovado em 03/11, publicação registrada pelo coordenador.
+- Keystore Android existente só foi reutilizado após autorização explícita do usuário; certificado do candidato comparado ao APK público 1.0.0, sem expor senha. APK final do código aprovado foi assinado em 03/11, com certificado idêntico à versão pública anterior.
+- Coordenação/portal/release/Drive permanecem com o coordenador. Nenhuma homologação física declarada.
+
+## Empacotamento Android — 03/11/2026
+
+Identificada a causa comprovada dos assets ausentes no emulador: o aapt2 Windows gravava nomes ZIP com barras invertidas nos cabeçalhos locais e centrais. Python no Windows normalizava `ZipInfo.filename` durante a leitura, ocultando o defeito; Android e Linux preservam os nomes literais. O build agora normaliza `orig_filename` antes de alinhar/assinar e valida cabeçalhos, CRC, índice e todos os 77 PNG. Teste local no APK real detectou 78 entradas defeituosas e verificou a correção. Callbacks AAssetManager permanecem; CI Android 41588036821 e assinatura do APK final foram aprovados em 03/11. O coordenador registra a publicação. Responsável: Codex / agente Nightfall.
+
+## Superfície Android — 03/11/2026
+
+CI 41586931399 confirmou o índice de 77 assets e o título com arte original após normalizar o ZIP. O gate seguinte detectou escala vertical incorreta e menus inacessíveis: a raylib 5.5 combinava o tamanho lógico fixo com seu próprio escalonamento da superfície Android. O frontend passa a iniciar na resolução real da superfície (`InitWindow(0,0)` apenas Android), preservando o framebuffer de jogo 960×540 e seu viewport. A janela é configurada em paisagem antes de iniciar a thread nativa. QA passa a exigir o estado esperado em cada captura e sempre exportar logcat/Activity/Window quando falha. CI final 41588036821 aprovado nos três jobs em 03/11; registro de release/publicação pelo coordenador. Responsável: Codex / agente Nightfall.
+
+QA Android também executa o mesmo APK em superfícies 16:9 (960×540) e 5:3 (1000×600), limpando somente os dados do pacote descartável `.qa`, exigindo cada estado de menu e o mesmo PID após background/retorno. Ambos os percursos passaram no CI 41588036821, com 22 capturas e logs de evidência. Responsável: Codex / agente Nightfall.
+
+## Validação final da entrega 1.0.1 — 03/11/2026
+
+CI 41588036821 aprovado (Windows/100.800 comparações/Android e dois percursos emulados 16:9 e 5:3). Windows instalado e desinstalado isoladamente, 80 hashes e render dos 16 mundos aprovados; APK ARM64 assinado com identidade preservada. Detalhes e hashes em NightfallNative/docs/FIDELITY_REPAIR.md. Publicação e backup têm registro final nos contextos do portal pelo coordenador. Limites físicos descritos em AGENTS.md. Responsável: Codex / agente Nightfall.
