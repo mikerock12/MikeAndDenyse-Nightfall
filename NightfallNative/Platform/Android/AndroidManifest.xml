@@ -20,7 +20,7 @@
         <activity
             android:name="com.mikeanddenyse.nightfall.MainActivity"
             android:label="@string/app_name"
-            android:screenOrientation="sensorLandscape"
+            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
             android:exported="true">
             <meta-data android:name="android.app.lib_name" android:value="nightfall" />

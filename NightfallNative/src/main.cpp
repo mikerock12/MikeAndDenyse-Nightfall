@@ -370,7 +370,13 @@ int main(int argc, char** argv)
     }
 
     SetConfigFlags(renderSmokeDirectory.empty() ? FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT : FLAG_WINDOW_HIDDEN);
+#ifdef PLATFORM_ANDROID
+    // Use the actual Android surface size. raylib 5.5's fixed logical window
+    // path applies its own framebuffer scale in addition to our 16:9 target.
+    InitWindow(0, 0, "Mike & Denyse: Nightfall (C++20 Native)");
+#else
     InitWindow(T::ViewW, T::ViewH, "Mike & Denyse: Nightfall (C++20 Native)");
+#endif
     SetTargetFPS(renderSmokeDirectory.empty()?60:0);
 
     SetExitKey(KEY_NULL);

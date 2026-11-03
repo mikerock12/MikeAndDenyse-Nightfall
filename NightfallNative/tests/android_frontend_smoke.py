@@ -3,6 +3,7 @@
 Screenshots/logcat are evidence for human visual review, not physical device approval.
 """
 from pathlib import Path
+import atexit
 import hashlib
 import json
 import re
@@ -33,6 +34,19 @@ with zipfile.ZipFile(apk) as archive:
     (output/'apk-assets.json').write_text(json.dumps({'index':index,'entries':names},indent=2),encoding='utf-8')
 def adb(*args):
     return subprocess.run(['adb', *args], capture_output=True, check=True).stdout
+
+def save_device_evidence():
+    # Keep diagnostic evidence even when a later navigation assertion fails.
+    for name, args in [
+        ('logcat.txt', ('logcat', '-d')),
+        ('activity.txt', ('shell', 'dumpsys', 'activity', 'activities')),
+        ('window.txt', ('shell', 'dumpsys', 'window')),
+    ]:
+        try:
+            (output/name).write_bytes(adb(*args))
+        except (OSError, subprocess.CalledProcessError):
+            pass
+atexit.register(save_device_evidence)
 adb('install', '-r', str(apk))
 adb('logcat', '-c')
 adb('shell', 'wm', 'size', '540x960')
@@ -71,8 +85,12 @@ else:
     raise RuntimeError('Native frontend did not finish initialization with all 77 assets')
 images = []
 width, height = 960, 540
-def capture(name):
+def capture(name, expected_screen):
     global width, height
+    screen_log=adb('logcat','-d','-s','raylib').decode('utf-8',errors='replace')
+    screens=re.findall(r'NIGHTFALL_SCREEN: (\d+)',screen_log)
+    if not screens or int(screens[-1]) != expected_screen:
+        raise RuntimeError(f'{name}: expected screen {expected_screen}, got {screens[-1:]!r}')
     data = adb('exec-out', 'screencap', '-p')
     if data[:8] != b'\x89PNG\r\n\x1a\n':
         raise RuntimeError('screencap returned no PNG')
@@ -88,42 +106,42 @@ def point(x, y):
 def tap(x, y):
     adb('shell', 'input', 'tap', *point(x, y))
     time.sleep(1)
-capture('01-title')
+capture('01-title',0)
 tap(480,326)
-capture('02-hero-select')
+capture('02-hero-select',1)
 tap(305,250)
 tap(480,481)
-capture('03-map')
+capture('03-map',2)
 tap(480,501)
 time.sleep(3)
-capture('04-mike-playing')
+capture('04-mike-playing',4)
 right = point(204,430)
 adb('shell','input','swipe',*right,*right,'1200')
 tap(862,422)
 tap(714,452)
-capture('05-mike-after-input')
+capture('05-mike-after-input',4)
 tap(55,33)
-capture('06-pause')
+capture('06-pause',4)
 tap(480,312)
 adb('shell','input','keyevent','4')
 time.sleep(1)
-capture('07-back-pauses')
+capture('07-back-pauses',4)
 tap(480,377)
-capture('08-return-map')
+capture('08-return-map',2)
 tap(880,33)
 tap(645,250)
 tap(480,481)
 tap(480,501)
 time.sleep(3)
-capture('09-denyse-playing')
+capture('09-denyse-playing',4)
 tap(714,452)
 tap(862,422)
-capture('10-denyse-after-input')
+capture('10-denyse-after-input',4)
 adb('shell','input','keyevent','3')
 time.sleep(1)
 adb('shell','am','start','-W','-n',f'{package}/{activity}')
 time.sleep(2)
-capture('11-resumed')
+capture('11-resumed',4)
 log = adb('logcat','-d').decode('utf-8',errors='replace')
 (output/'logcat.txt').write_text(log,encoding='utf-8')
 (output/'activity.txt').write_bytes(adb('shell','dumpsys','activity','activities'))
