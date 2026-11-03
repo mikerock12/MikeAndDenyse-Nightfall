@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(NightfallNative VERSION 1.0.1 LANGUAGES C CXX)
+project(NightfallNative VERSION 1.0.2 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -44,6 +44,14 @@ if(WIN32 AND EXISTS "${RAYLIB_ROOT}/lib/raylibdll.lib")
     add_executable(NightfallNative
         src/main.cpp
     )
+    enable_language(RC)
+    set(SLT_BRANDING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Platform/Windows/Branding")
+    set(SLT_PRODUCT_NAME "Mike & Denyse: Nightfall")
+    set(SLT_VERSION "${PROJECT_VERSION}")
+    string(REPLACE "." "," SLT_VERSION_COMMAS "${PROJECT_VERSION}.0")
+    configure_file(Platform/Windows/GameResources.rc.in "${CMAKE_CURRENT_BINARY_DIR}/GameResources.rc" @ONLY)
+    target_sources(NightfallNative PRIVATE Platform/Windows/WindowsBranding.cpp "${CMAKE_CURRENT_BINARY_DIR}/GameResources.rc")
+    target_include_directories(NightfallNative PRIVATE Platform/Windows)
     target_include_directories(NightfallNative PRIVATE "${RAYLIB_ROOT}/include")
     target_link_libraries(NightfallNative PRIVATE
         NightfallCore

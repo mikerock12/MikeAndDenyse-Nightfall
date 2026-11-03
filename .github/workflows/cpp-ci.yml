@@ -76,8 +76,8 @@ jobs:
           name: nightfall-android-candidates
           retention-days: 7
           path: |
-            NightfallNative/Saved/Packages/Release-1.0.1/*arm64-v8a-UNSIGNED.apk
-            NightfallNative/Saved/Packages/Release-1.0.1/*x86_64-QA.apk
+            NightfallNative/Saved/Packages/Release-1.0.2/*arm64-v8a-UNSIGNED.apk
+            NightfallNative/Saved/Packages/Release-1.0.2/*x86_64-QA.apk
 
   android-emulator-frontend:
     needs: build-android-frontend
@@ -104,8 +104,8 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -camera-back none
           script: |
-            python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.0.1-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence/16-9
-            ANDROID_SMOKE_SIZE=600x1000 python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.0.1-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence/5-3
+            python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.0.2-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence/16-9
+            ANDROID_SMOKE_SIZE=600x1000 python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.0.2-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence/5-3
       - uses: actions/upload-artifact@v4
         if: always()
         with:
