@@ -95,8 +95,15 @@ images = []
 width, height = 960, 540
 def capture(name, expected_screen):
     global width, height
-    screen_log=adb('logcat','-d','-s','raylib').decode('utf-8',errors='replace')
-    screens=re.findall(r'NIGHTFALL_SCREEN: (\d+)',screen_log)
+    deadline = time.monotonic() + 12
+    while True:
+        screen_log=adb('logcat','-d','-s','raylib').decode('utf-8',errors='replace')
+        screens=re.findall(r'NIGHTFALL_SCREEN: (\d+)',screen_log)
+        if screens and int(screens[-1]) == expected_screen:
+            break
+        if time.monotonic() >= deadline:
+            break
+        time.sleep(0.25)
     if not screens or int(screens[-1]) != expected_screen:
         raise RuntimeError(f'{name}: expected screen {expected_screen}, got {screens[-1:]!r}')
     data = adb('exec-out', 'screencap', '-p')
@@ -112,7 +119,10 @@ def point(x, y):
     scale = min(width / 960, height / 540)
     return str(round((width - 960*scale)/2 + x*scale)), str(round((height - 540*scale)/2 + y*scale))
 def tap(x, y):
-    adb('shell', 'input', 'tap', *point(x, y))
+    # adb tap has zero hold time and can release before a software-GPU frame.
+    # Inject one human-duration gesture; never retry or weaken the screen gate.
+    position = point(x, y)
+    adb('shell', 'input', 'swipe', *position, *position, '120')
     time.sleep(1)
 capture('01-title',0)
 tap(480,326)

@@ -1,5 +1,7 @@
 # Contexto Operacional — Mike & Denyse: Nightfall (`contexto.md`)
 
+Em 03/11/2026, o CI 41589263103 expôs um gesto adb sem duração perdido no menu em GPU de software. O driver passa a injetar toque imóvel de 120 ms e aguardar a tela esperada por até 12 s, sem reenviar ações nem afrouxar a igualdade de estado. Aplicação e candidatos permanecem inalterados; repete-se o CI para esse ajuste de QA. Responsável: Codex.
+
 ## Nightfall nativo 1.0.1 — validação de 03/11/2026
 
 Frontend C++20/raylib compartilhado Windows/Android, menus touch, comandos multitouch, pausa/Voltar, arte original, atlas procedural, SFX, progresso privado e LAN nativa v3 implementados. Unity e referências preservados. O APK usa caminhos ZIP portáveis, AAssetManager e a resolução real da superfície Android; o framebuffer 960×540 é apresentado por viewport com proporção preservada.
