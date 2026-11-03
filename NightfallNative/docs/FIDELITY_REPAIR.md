@@ -1,13 +1,13 @@
 # Correção de fidelidade nativa — 02/11/2026
 
-Responsável pela implementação: Codex / agente Nightfall. O coordenador consolida QA, publicação e backups dos quatro projetos. **1.0.1 é um candidato; este documento não declara publicação nem homologação física.**
+Responsável pela implementação: Codex / agente Nightfall. O coordenador consolida QA, publicação e backups dos quatro projetos. **1.0.1 tem builds, QA emulado e assinatura aprovados; publicação/backup são registrados pelo coordenador do portal. Não há homologação física Android.**
 
 ## Falhas corrigidas
 
 - O APK 1.0.0 tinha `SurfaceView` e loop JNI sem renderização. `MainActivity` agora estende `NativeActivity`; `libnightfall.so` contém raylib e o mesmo `src/main.cpp` usado no Windows. A antiga ponte de simulação foi removida.
 - Menus funcionam por toque, mouse, teclado e confirmação por gamepad. Há seleção dos dois heróis, mapa, sala LAN, pausa, retorno, morte e conclusão. O atalho de depuração que liberava todas as fases foi retirado da interface.
 - Todos os dedos participam dos controles. Pulo e ataque disparam na borda, enquanto movimento e pulo sustentado permanecem ativos. Coordenadas usam o viewport 16:9, inclusive em telas mais largas. O botão Android Voltar pausa ou retorna ao menu anterior.
-- Os 77 PNG originais são indexados no APK e carregados por callbacks explícitos de `AAssetManager_open/read`, inclusive para entradas comprimidas. O teste emulado revelou caminhos ZIP com barras invertidas produzidos pelo aapt2 Windows, ocultados por `ZipInfo.filename` no Windows. O empacotamento normaliza `orig_filename` e valida os cabeçalhos locais/centrais, índice, CRC e 77 PNG antes de alinhar e assinar. O resultado emulado após a correção continua obrigatório, sem reduzir as assertions. Sprites preservam proporção, pés e espelho horizontal; não usam largura de destino negativa. Texturas são carregadas sob demanda, limitadas a 512 px nos sprites e 1024 px nos cenários, sem alterar os fontes originais.
+- Os 77 PNG originais são indexados no APK e carregados por callbacks explícitos de `AAssetManager_open/read`, inclusive para entradas comprimidas. O teste emulado revelou caminhos ZIP com barras invertidas produzidos pelo aapt2 Windows, ocultados por `ZipInfo.filename` no Windows. O empacotamento normaliza `orig_filename` e valida os cabeçalhos locais/centrais, índice, CRC e 77 PNG antes de alinhar e assinar. O CI 41588036821 aprovou os dois percursos emulados após a correção, sem reduzir as assertions. Sprites preservam proporção, pés e espelho horizontal; não usam largura de destino negativa. Texturas são carregadas sob demanda, limitadas a 512 px nos sprites e 1024 px nos cenários, sem alterar os fontes originais.
 - `NativeWorldArt.h` porta os algoritmos de atlas 11 × 2, chão, plataformas, espinhos, sarças, líquidos, gelo, mola e escada de `ArtGen.cs`, além de céu, cristas, vinheta e corações. Decoração, atmosfera, golpes, projéteis, santuário e HUD dos dois heróis voltam a aparecer. O seed cosmético usa FNV estável em lugar do `String.GetHashCode` variável por processo do .NET; partículas e composição de menus não são uma comparação pixel a pixel com Unity.
 - SFX incluem as misturas originais de impacto, pisada e chefe, guarda de 35 ms, volume e variação cosmética de pitch. Não usam o RNG da simulação.
 - Progresso Windows vai para `%LOCALAPPDATA%/SmellsLikeTech/Nightfall`, com importação única do arquivo legado ao lado do executável. Android usa o diretório privado da atividade. A chave de assinatura existente não é substituída.
@@ -64,15 +64,22 @@ Windows também usa runtime C++ estático (`/MT`). A auditoria PE do executável
 
 Para release são necessárias `SLT_GAMES_KEYSTORE`, `SLT_GAMES_STORE_PASSWORD` e, se diferente de `sltgames`, `SLT_GAMES_KEY_ALIAS`. O script reutiliza a identidade existente, recebe senha pelo ambiente e não gera chave de produção. Binários, chaves e recibos privados ficam fora do Git.
 
-## Gates que ainda precisam de evidência
+## QA Android e distribuíveis aprovados — 03/11/2026
 
-- Execução Android em emulador: workflow preparado com APK x86_64 QA, SwiftShader, navegação real dos menus, dois heróis, inputs, pausa/Voltar e background/retorno; somente o resultado efetivo e as capturas podem aprovar essa etapa.
-- Toque e áudio em ARM64 físico e cooperativo Wi-Fi em dois aparelhos.
-- Revisão humana da apresentação, teste interativo do instalador, assinatura de release, CI hospedado, merge e publicação coordenada no portal.
-- Backup privado final e restauração depois do snapshot publicado.
+[CI 41588036821](https://github.com/mikerock12/MikeAndDenyse-Nightfall/actions/runs/41588036821), aplicação 35b19d8c70329685d0840d97486b72c4dbdc4b33: três jobs aprovados (Windows/CTest/referência, Android ARM64+QA, emulador). O APK x86_64 QA percorreu 16:9 e 5:3, com assertions de cada tela, 77 assets indexados e o mesmo PID após background/retorno. Foram produzidas 22 capturas reais; revisão visual confirmou apresentação sem compressão, toque nos menus, Mike/Denyse, cenário em movimento, golpes e pausa/Voltar. Emulação é API 35 com SwiftShader e não comprova desempenho, áudio audível ou toque em aparelho físico.
+
+Windows foi recompilado da mesma aplicação e passou instalação silenciosa isolada, 80 hashes iguais ao ZIP, headless, renderização instalada dos 16 mundos e desinstalação. O APK ARM64 tem package ID preservado, versionCode 13 (anterior 12), assinatura v2/v3 com certificado igual ao 1.0.0, ZIP portável e alinhamento APK/ELF 16 KiB. Os checksums ficam junto dos três pacotes em Saved/Packages/Release-1.0.1/SHA256SUMS.txt (fora do Git).
+
+| Arquivo | Bytes | SHA-256 |
+|---|---:|---|
+| MikeAndDenyse-1.0.1-Windows-x64-Setup.exe | 93709121 | d13dde71abc6d2905a3a76903cce2ab8f3607f490422e20813685979c24eef44 |
+| MikeAndDenyse-1.0.1-Windows-x64.zip | 91838390 | e1e2a8f329cbe6275ac43d0b2da164e13ef93a3efbb9736ab264584f20c4d4ad |
+| MikeAndDenyse-1.0.1-Android-arm64.apk | 94066948 | 3ee90ed54c88db64ee7de7e9c4a3b7958fb90f052ac03078d1a90130fa645b9e |
+
+Permanecem sem homologação: toque/multitouch, áudio e atualização instalada em ARM64 físico; cooperativo Wi-Fi em dois aparelhos. Publicação/merge/release/backup têm registro final nos arquivos de contexto do portal pelo coordenador; este documento descreve os distribuíveis verificados.
 
 ## Superfície Android — 03/11/2026
 
-CI 41586931399 confirmou o índice de 77 assets e o título com arte original após normalizar o ZIP. O gate seguinte detectou escala vertical incorreta e menus inacessíveis: a raylib 5.5 combinava o tamanho lógico fixo com seu próprio escalonamento da superfície Android. O frontend passa a iniciar na resolução real da superfície (`InitWindow(0,0)` apenas Android), preservando o framebuffer de jogo 960×540 e seu viewport. A janela é configurada em paisagem antes de iniciar a thread nativa. QA passa a exigir o estado esperado em cada captura e sempre exportar logcat/Activity/Window quando falha. Novo resultado emulado ainda necessário; nenhum release publicado. Responsável: Codex / agente Nightfall.
+CI 41586931399 confirmou o índice de 77 assets e o título com arte original após normalizar o ZIP. O gate seguinte detectou escala vertical incorreta e menus inacessíveis: a raylib 5.5 combinava o tamanho lógico fixo com seu próprio escalonamento da superfície Android. O frontend passa a iniciar na resolução real da superfície (`InitWindow(0,0)` apenas Android), preservando o framebuffer de jogo 960×540 e seu viewport. A janela é configurada em paisagem antes de iniciar a thread nativa. QA passa a exigir o estado esperado em cada captura e sempre exportar logcat/Activity/Window quando falha. CI final 41588036821 aprovado nos três jobs em 03/11; registro de release/publicação pelo coordenador. Responsável: Codex / agente Nightfall.
 
-QA Android também executa o mesmo APK em superfícies 16:9 (960×540) e 5:3 (1000×600), limpando somente os dados do pacote descartável `.qa`, exigindo cada estado de menu e o mesmo PID após background/retorno. Ambos os resultados continuam necessários. Responsável: Codex / agente Nightfall.
+QA Android também executa o mesmo APK em superfícies 16:9 (960×540) e 5:3 (1000×600), limpando somente os dados do pacote descartável `.qa`, exigindo cada estado de menu e o mesmo PID após background/retorno. Ambos os percursos passaram no CI 41588036821, com 22 capturas e logs de evidência. Responsável: Codex / agente Nightfall.

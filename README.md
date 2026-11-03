@@ -1,10 +1,10 @@
 # Mike & Denyse: Nightfall
 
-## Port nativo C++ — candidato 1.0.1 (02/11/2026)
+## Port nativo C++ — 1.0.1 (03/11/2026)
 
-`NightfallNative/` preserva o projeto Unity abaixo e usa o mesmo frontend C++20/raylib em Windows e Android. O candidato corrige o APK 1.0.0 que executava a simulação sem desenhar o jogo. Inclui menus por toque, multitouch, áudio, arte procedural derivada do original, progressão e cooperativo entre clientes nativos da mesma versão.
+`NightfallNative/` preserva o projeto Unity abaixo e usa o mesmo frontend C++20/raylib em Windows e Android. A versão 1.0.1 corrige o APK 1.0.0 que executava a simulação sem desenhar o jogo. Inclui menus por toque, multitouch, áudio, arte procedural derivada do original, progressão e cooperativo entre clientes nativos da mesma versão.
 
-Build/CTest local e comparação de 100.800 passos contra os fontes C# originais passaram. A renderização Windows gerou capturas reais dos 16 mundos. Isso não encerra a validação Android, o teste em dois aparelhos físicos ou a publicação: o candidato ainda depende desses registros e da assinatura de release existente.
+CTest, comparação de 100.800 passos contra fontes C# originais e CI hospedado passaram. Windows foi instalado/desinstalado em teste isolado, comparou os 80 arquivos ao ZIP e renderizou os 16 mundos. Android emulado passou em 16:9 e 5:3, com menus, os dois heróis, inputs, pausa/Voltar e mesmo processo após background/retorno; o APK ARM64 está assinado com a identidade existente. Toque/áudio/atualização em ARM64 físico e Wi-Fi em dois aparelhos continuam sem homologação. Publicação e backups são consolidados nos contextos do portal pelo coordenador.
 
 Comandos, escopo da comparação e limitações estão em [NightfallNative/docs/FIDELITY_REPAIR.md](NightfallNative/docs/FIDELITY_REPAIR.md).
 
