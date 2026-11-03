@@ -2,6 +2,9 @@
 #include "NightfallNet.h"
 #include "NativeWorldArt.h"
 #include "raylib.h"
+#if defined(_WIN32)
+#include "WindowsBranding.h"
+#endif
 
 #include <algorithm>
 #include <cmath>
@@ -376,6 +379,12 @@ int main(int argc, char** argv)
     InitWindow(0, 0, "Mike & Denyse: Nightfall (C++20 Native)");
 #else
     InitWindow(T::ViewW, T::ViewH, "Mike & Denyse: Nightfall (C++20 Native)");
+#endif
+#if defined(_WIN32)
+    const auto iconBytes = SLTBranding::ApplicationIconPng();
+    Image appIcon = LoadImageFromMemory(".png", iconBytes.data(), static_cast<int>(iconBytes.size()));
+    if (appIcon.data) { SetWindowIcon(appIcon); UnloadImage(appIcon); TraceLog(LOG_INFO, "NIGHTFALL_APP_ICON: embedded icon applied"); }
+    else TraceLog(LOG_ERROR, "NIGHTFALL_APP_ICON: embedded icon missing or invalid");
 #endif
     SetTargetFPS(renderSmokeDirectory.empty()?60:0);
 

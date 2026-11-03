@@ -1,0 +1,10 @@
+{
+  "game": "Mike & Denyse: Nightfall",
+  "method": "Built-in image_gen compositing with original character references; transparent background",
+  "prompt": "Use case: compositing, identity-preserve.\nAsset type: square Windows application icon for Mike & Denyse: Nightfall, meant for both the game's EXE and its installer.\nInput image 1 is Mike, the male sword hunter; input image 2 is Denyse, the female crystal witch. Use these exact original game characters as compositing sources, preserving their faces, hair, clothing, armor, pixel-art rendering, poses, sword and crystal staff. Do not redesign them.\nPrimary request: remove the magenta chroma backgrounds and compose Mike and Denyse side by side as a clean, recognizable game icon. Mike on the left with his silver sword clearly visible; Denyse on the right with her purple crystal staff clearly visible. Both characters, including weapons, must fit in the square composition and be large enough to recognize at small icon sizes. Keep a little transparent padding around the outer silhouette; do not crop heads or weapons. No extra people, no lettering, no logo text, no badges, no rounded-square container, no scenery, no cast background shadow. Actual transparent background, with no magenta remnants, no checkerboard baked into the image. Sharp and faithful pixel-art details. Preserve the original character identities aggressively.",
+  "inputs": [
+    "NightfallUnity/Assets/StreamingAssets/art/chars/mike_idle.png",
+    "NightfallUnity/Assets/StreamingAssets/art/chars/denyse_idle.png"
+  ],
+  "containerEncoding": "Pillow ICO sizes 16,20,24,32,40,48,64,96,128,256; no creative changes during encoding"
+}

@@ -1,5 +1,5 @@
 #ifndef AppVersion
-  #define AppVersion "1.0.0"
+  #define AppVersion "1.0.2"
 #endif
 
 [Setup]
@@ -16,6 +16,8 @@ OutputBaseFilename=MikeAndDenyse-{#AppVersion}-Windows-x64-Setup
 Compression=lzma2/fast
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=Branding\AppIcon.ico
+UninstallDisplayIcon={app}\NightfallNative.exe
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequiredOverridesAllowed=dialog
@@ -30,8 +32,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "..\..\Saved\Packages\WindowsStage\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\Mike & Denyse - Nightfall"; Filename: "{app}\NightfallNative.exe"
-Name: "{autodesktop}\Mike & Denyse - Nightfall"; Filename: "{app}\NightfallNative.exe"; Tasks: desktopicon
+Name: "{group}\Mike & Denyse - Nightfall"; Filename: "{app}\NightfallNative.exe"; WorkingDir: "{app}"; IconFilename: "{app}\NightfallNative.exe"; IconIndex: 0
+Name: "{autodesktop}\Mike & Denyse - Nightfall"; Filename: "{app}\NightfallNative.exe"; WorkingDir: "{app}"; IconFilename: "{app}\NightfallNative.exe"; IconIndex: 0; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\NightfallNative.exe"; Description: "{cm:LaunchProgram,Mike & Denyse: Nightfall}"; Flags: nowait postinstall skipifsilent
