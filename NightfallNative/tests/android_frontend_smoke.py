@@ -6,6 +6,7 @@ from pathlib import Path
 import atexit
 import hashlib
 import json
+import os
 import re
 import struct
 import subprocess
@@ -48,8 +49,13 @@ def save_device_evidence():
             pass
 atexit.register(save_device_evidence)
 adb('install', '-r', str(apk))
+adb('shell', 'am', 'force-stop', package)
+# This package is isolated from the released game and contains only QA data.
+adb('shell', 'pm', 'clear', package)
 adb('logcat', '-c')
-adb('shell', 'wm', 'size', '540x960')
+display_size = os.environ.get('ANDROID_SMOKE_SIZE', '540x960')
+assert re.fullmatch(r'\d+x\d+', display_size)
+adb('shell', 'wm', 'size', display_size)
 adb('shell', 'wm', 'density', '160')
 adb('shell', 'settings', 'put', 'secure', 'immersive_mode_confirmations', 'confirmed')
 adb('shell', 'settings', 'put', 'system', 'accelerometer_rotation', '0')
@@ -83,6 +89,8 @@ else:
     (output/'logcat.txt').write_bytes(adb('logcat','-d'))
     (output/'startup-blocked.png').write_bytes(adb('exec-out','screencap','-p'))
     raise RuntimeError('Native frontend did not finish initialization with all 77 assets')
+initial_pid=adb('shell','pidof',package).strip()
+assert initial_pid, 'Native game has no process after startup'
 images = []
 width, height = 960, 540
 def capture(name, expected_screen):
@@ -150,8 +158,8 @@ if re.search(r'FATAL EXCEPTION|Fatal signal|UnsatisfiedLinkError|Unable to start
 for evidence in ['indexed 77 original sprite assets','NIGHTFALL_SCREEN: 1','NIGHTFALL_SCREEN: 2','NIGHTFALL_SCREEN: 4','NIGHTFALL_PAUSE: 1']:
     if evidence not in log:
         raise RuntimeError(f'Missing evidence of native frontend state: {evidence}')
-if not adb('shell','pidof',package).strip():
-    raise RuntimeError('Game process did not survive input/lifecycle test')
-manifest = {'apk_sha256':hashlib.sha256(apk.read_bytes()).hexdigest(),'package':package,'device':'Android API 35 x86_64 emulator, software GPU','scope':'native menu navigation, both heroes, movement/jump/attack input, pause/back, background/resume; screenshots require visual review','physical_device':False,'images':images,'passed':True}
+if adb('shell','pidof',package).strip() != initial_pid:
+    raise RuntimeError('Game process was replaced during input/lifecycle test')
+manifest = {'apk_sha256':hashlib.sha256(apk.read_bytes()).hexdigest(),'package':package,'device':'Android API 35 x86_64 emulator, software GPU','display_size_override':display_size,'scope':'native menu navigation with per-screen assertions, both heroes, movement/jump/attack input, pause/back, background/resume with same PID; screenshots require visual review','physical_device':False,'images':images,'passed':True}
 (output/'provenance.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
 print(json.dumps(manifest,indent=2))

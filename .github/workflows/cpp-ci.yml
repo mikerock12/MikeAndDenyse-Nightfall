@@ -103,7 +103,9 @@ jobs:
           profile: pixel_2
           disable-animations: true
           emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -camera-back none
-          script: python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.0.1-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence
+          script: |
+            python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.0.1-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence/16-9
+            ANDROID_SMOKE_SIZE=600x1000 python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.0.1-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence/5-3
       - uses: actions/upload-artifact@v4
         if: always()
         with:

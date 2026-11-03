@@ -492,3 +492,5 @@ Identificada a causa comprovada dos assets ausentes no emulador: o aapt2 Windows
 ## Superfície Android — 03/11/2026
 
 CI 41586931399 confirmou o índice de 77 assets e o título com arte original após normalizar o ZIP. O gate seguinte detectou escala vertical incorreta e menus inacessíveis: a raylib 5.5 combinava o tamanho lógico fixo com seu próprio escalonamento da superfície Android. O frontend passa a iniciar na resolução real da superfície (`InitWindow(0,0)` apenas Android), preservando o framebuffer de jogo 960×540 e seu viewport. A janela é configurada em paisagem antes de iniciar a thread nativa. QA passa a exigir o estado esperado em cada captura e sempre exportar logcat/Activity/Window quando falha. Novo resultado emulado ainda necessário; nenhum release publicado. Responsável: Codex / agente Nightfall.
+
+QA Android também executa o mesmo APK em superfícies 16:9 (960×540) e 5:3 (1000×600), limpando somente os dados do pacote descartável `.qa`, exigindo cada estado de menu e o mesmo PID após background/retorno. Ambos os resultados continuam necessários. Responsável: Codex / agente Nightfall.
