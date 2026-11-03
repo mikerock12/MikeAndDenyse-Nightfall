@@ -279,3 +279,7 @@ O projeto não tinha git: o `.git` em `D:\PROJETOS` era uma pasta vazia, não um
 - CI real revelou tutorial fullscreen e, depois dele, assets zero apesar dos 77 PNG no APK. Corrigiu leitura do aplicativo via callbacks AAssetManager diretos; não reduziu as assertions. PR #2 aberto, QA Android final e publicação ainda pendentes.
 - Keystore Android existente só foi reutilizado após autorização explícita do usuário; certificado do candidato comparado ao APK público 1.0.0, sem expor senha. Novo APK final aguarda código aprovado pelo QA.
 - Coordenação/portal/release/Drive permanecem com o coordenador. Nenhuma homologação física declarada.
+
+## Empacotamento Android — 03/11/2026
+
+Identificada a causa comprovada dos assets ausentes no emulador: o aapt2 Windows gravava nomes ZIP com barras invertidas nos cabeçalhos locais e centrais. Python no Windows normalizava `ZipInfo.filename` durante a leitura, ocultando o defeito; Android e Linux preservam os nomes literais. O build agora normaliza `orig_filename` antes de alinhar/assinar e valida cabeçalhos, CRC, índice e todos os 77 PNG. Teste local no APK real detectou 78 entradas defeituosas e verificou a correção. Callbacks AAssetManager permanecem; CI Android completo e assinatura do candidato final ainda pendentes. Não houve publicação. Responsável: Codex / agente Nightfall.

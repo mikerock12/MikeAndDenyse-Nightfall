@@ -23,6 +23,7 @@ activity = 'com.mikeanddenyse.nightfall.MainActivity'
 # render NativeActivity even when its asset ZIP entries are unusable or absent.
 with zipfile.ZipFile(apk) as archive:
     names = archive.namelist()
+    assert all('\\' not in entry.orig_filename for entry in archive.infolist()), 'APK has Windows ZIP names'
     index = archive.read('assets/art/index.txt').decode('utf-8').splitlines()
     assert len(index) == 77, f'Expected 77 original images, got {len(index)}'
     for relative in index:

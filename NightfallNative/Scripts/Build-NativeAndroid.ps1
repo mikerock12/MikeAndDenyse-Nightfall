@@ -82,6 +82,10 @@ $Unsigned = Join-Path $PackDir 'unsigned.apk'
 Copy-Item -LiteralPath (Join-Path $PackDir 'base.apk') -Destination $Unsigned -Force
 Push-Location $Stage
 try { & (Join-Path $JdkBin 'jar.exe') uf $Unsigned 'classes.dex' "lib/$Abi/libnightfall.so"; Check 'jar' } finally { Pop-Location }
+# Android treats backslashes from Windows aapt2 ZIP names literally.
+# Repair local and central names, validate artwork, then align and sign.
+& python (Join-Path $PSScriptRoot 'normalize_apk_zip.py') $Unsigned
+Check 'portable APK ZIP entries and 77 original artwork assets'
 & (Join-Path $BuildTools 'zipalign.exe') -f -P 16 4 $Unsigned (Join-Path $PackDir 'aligned.apk')
 Check '16KB APK alignment'
 if ($UnsignedOnly) {

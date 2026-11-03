@@ -484,3 +484,7 @@ Acrescentado na v3.0:
 - [ ] Assinar pacote final aprovado com certificado existente, CI verde, merge/publicação coordenada e backup privado restaurável.
 
 Método, comandos e limites em `NightfallNative/docs/FIDELITY_REPAIR.md`. Responsável: Codex / agente Nightfall; coordenador consolida a entrega.
+
+## Empacotamento Android — 03/11/2026
+
+Identificada a causa comprovada dos assets ausentes no emulador: o aapt2 Windows gravava nomes ZIP com barras invertidas nos cabeçalhos locais e centrais. Python no Windows normalizava `ZipInfo.filename` durante a leitura, ocultando o defeito; Android e Linux preservam os nomes literais. O build agora normaliza `orig_filename` antes de alinhar/assinar e valida cabeçalhos, CRC, índice e todos os 77 PNG. Teste local no APK real detectou 78 entradas defeituosas e verificou a correção. Callbacks AAssetManager permanecem; CI Android completo e assinatura do candidato final ainda pendentes. Não houve publicação. Responsável: Codex / agente Nightfall.
