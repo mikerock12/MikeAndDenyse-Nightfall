@@ -92,6 +92,8 @@ else:
     (output/'logcat.txt').write_bytes(adb('logcat','-d'))
     (output/'startup-blocked.png').write_bytes(adb('exec-out','screencap','-p'))
     raise RuntimeError('Native frontend did not finish initialization with all 77 assets')
+geometry=re.findall(r'SLT_BUFFER_GEOMETRY: (\d+) x (\d+) result=(-?\d+)',startup_log)
+assert geometry and int(geometry[-1][0])>1 and int(geometry[-1][1])>1 and geometry[-1][2]=='0', 'Physical buffer geometry was not applied'
 initial_pid=adb('shell','pidof',package).strip()
 assert initial_pid, 'Native game has no process after startup'
 images = []
