@@ -11,6 +11,8 @@ import java.io.IOException;
 /** The complete C++ frontend owns rendering, input and audio. */
 public class MainActivity extends NativeActivity {
     private WifiManager.MulticastLock discoveryLock;
+    private static native void nativeSetPaused(boolean paused);
+
     @Override public void onCreate(Bundle state) {
         // Configure the window before NativeActivity starts the C++ thread.
         // A late fullscreen/layout transition can leave the first EGL surface
@@ -37,10 +39,16 @@ public class MainActivity extends NativeActivity {
     }
     @Override protected void onResume() {
         super.onResume();
+        nativeSetPaused(false);
         if (discoveryLock != null && !discoveryLock.isHeld()) discoveryLock.acquire();
     }
     @Override protected void onPause() {
+        nativeSetPaused(true);
         if (discoveryLock != null && discoveryLock.isHeld()) discoveryLock.release();
         super.onPause();
+    }
+    public void vibrateCombat() {
+        android.os.Vibrator vibrator=(android.os.Vibrator)getSystemService(android.content.Context.VIBRATOR_SERVICE);
+        if(vibrator!=null&&vibrator.hasVibrator())vibrator.vibrate(android.os.VibrationEffect.createOneShot(18,60));
     }
 }
