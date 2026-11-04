@@ -563,6 +563,7 @@ int main(int argc, char** argv)
         auto leaveMatch = [&](ScreenMode dest) {
             lan.Stop(); latestRemoteCtl = {}; touchCtl = {}; paused = false; screen = dest;
         };
+        if(SLTPrefs::Mobile&&SLTMobile::PauseRequested.exchange(false)&&screen==ScreenMode::Playing)paused=true;
         if (renderSmokeDirectory.empty() && (SLTPrefs::Mobile||settings.value.autoPause) && !IsWindowFocused() && screen == ScreenMode::Playing) paused = true;
         if (!SLTPrefs::Mobile && !settingsWasOpen && IsKeyPressed(KEY_F4)) {settings.value.touch=!settings.value.touch;settings.Save();}
 

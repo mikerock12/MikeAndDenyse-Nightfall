@@ -190,6 +190,8 @@ time.sleep(1)
 adb('shell','am','start','-W','-n',f'{package}/{activity}')
 time.sleep(2)
 capture('11-resumed',4)
+pauses=re.findall(r'NIGHTFALL_PAUSE: (\d+)',adb('logcat','-d','-s','raylib').decode(errors='replace'))
+assert pauses and pauses[-1]=='1', 'Background return must retain an explicit pause'
 log = adb('logcat','-d').decode('utf-8',errors='replace')
 (output/'logcat.txt').write_text(log,encoding='utf-8')
 (output/'activity.txt').write_bytes(adb('shell','dumpsys','activity','activities'))

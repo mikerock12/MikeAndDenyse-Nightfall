@@ -5,7 +5,7 @@
 #include <jni.h>
 extern "C" struct android_app* GetAndroidApp(void);
 namespace SLTMobile {
-inline std::atomic<bool> Background{false};
+inline std::atomic<bool> Background{false};inline std::atomic<bool> PauseRequested{false};
 
 inline Vector2 InitialSurfaceSize() {
     auto app=GetAndroidApp();if(!app||!app->activity)return {0,0};
@@ -19,7 +19,7 @@ inline Vector2 InitialSurfaceSize() {
     TraceLog(LOG_INFO,"SLT_ANDROID_SURFACE: %dx%d",sizes[0],sizes[1]);
     return {static_cast<float>(sizes[0]),static_cast<float>(sizes[1])};
 }
-inline void SetBackground(bool paused){Background=paused;if(paused&&IsAudioDeviceReady())SetMasterVolume(0);}
+inline void SetBackground(bool paused){Background=paused;if(paused){PauseRequested=true;if(IsAudioDeviceReady())SetMasterVolume(0);}}
 
 inline void Call(const char* method) {
     auto app=GetAndroidApp();if(!app||!app->activity)return;
@@ -32,5 +32,5 @@ inline void Call(const char* method) {
 }
 }
 #else
-namespace SLTMobile {inline std::atomic<bool> Background{false};inline void Call(const char*){}}
+namespace SLTMobile {inline std::atomic<bool> Background{false};inline std::atomic<bool> PauseRequested{false};inline void Call(const char*){}}
 #endif

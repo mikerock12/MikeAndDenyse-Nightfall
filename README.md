@@ -1,8 +1,10 @@
 # Mike & Denyse: Nightfall
 
-## Port nativo C++ — 1.1.0 (03/11/2026)
+## Port nativo C++ — 1.1.1 (03/11/2026)
 
 `NightfallNative/` preserva o projeto Unity abaixo e usa o mesmo frontend C++20/raylib em Windows e Android. O executável Windows usa subsistema GUI e abre sem prompt. Configurações de tela, qualidade, áudio e controles ficam salvas no dispositivo; Windows oferece modos de janela, resolução, VSync, FPS e renderização interna até 4K. A simulação mantém 60 Hz, independentemente do limite de renderização.
+
+A manutencao 1.1.1 inicializa a janela Android com suas dimensoes fisicas e preserva a pausa ao retornar do background.
 
 Android oferece controles por toque sempre visíveis, tamanho/opacidade/margem, modo canhoto e vibração. Mike e Denyse com suas armas identificam o APK em ícones tradicionais e adaptativos, assim como o executável e o instalador Windows. Os efeitos procedurais do original permanecem; trilhas e falas novas ainda dependem da etapa de produção de áudio.
 
