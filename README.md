@@ -1,18 +1,12 @@
 # Mike & Denyse: Nightfall
 
-## Nightfall1.2.0 — candidato com audio Suno
-
-Inclui16 musicas de cenario em loop, falas PT-BR de Mike/Denyse e17 chefes (51 cortes), e8 variantes de efeitos de combate editadas a partir de uma paleta Suno. Musica e vozes tem volumes separados; dialogos reduzem a musica e a pausa/background suspende a reproducao. Arte, regras e LAN continuam preservados. O candidato esta em validacao, sem substituir a release1.1.1 antes de CI e publicacao.
-
-Procedencia e hashes em NightfallNative/Content/audio/provenance.json. Matrizes originais em NightfallNative/AudioMasters/Suno-20261104 ficam fora dos pacotes publicos e entram no backup privado. Responsavel: Codex.
-
-## Port nativo C++ — 1.1.1 (03/11/2026)
+## Port nativo C++ — 1.2.0 (04/11/2026)
 
 `NightfallNative/` preserva o projeto Unity abaixo e usa o mesmo frontend C++20/raylib em Windows e Android. O executável Windows usa subsistema GUI e abre sem prompt. Configurações de tela, qualidade, áudio e controles ficam salvas no dispositivo; Windows oferece modos de janela, resolução, VSync, FPS e renderização interna até 4K. A simulação mantém 60 Hz, independentemente do limite de renderização.
 
-A manutencao 1.1.1 inicializa a janela Android com suas dimensoes fisicas e preserva a pausa ao retornar do background.
+A versao1.2.0 corrige a orientacao Android transitoria e preserva a pausa ao retornar do background.
 
-Android oferece controles por toque sempre visíveis, tamanho/opacidade/margem, modo canhoto e vibração. Mike e Denyse com suas armas identificam o APK em ícones tradicionais e adaptativos, assim como o executável e o instalador Windows. Os efeitos procedurais do original permanecem; trilhas e falas novas ainda dependem da etapa de produção de áudio.
+Android oferece controles por toque sempre visíveis, tamanho/opacidade/margem, modo canhoto e vibração. Mike e Denyse com suas armas identificam o APK em ícones tradicionais e adaptativos, assim como o executável e o instalador Windows. O jogo inclui16 trilhas Suno em loop,51 falas PT-BR para Mike/Denyse e17 chefes e8 variantes de efeitos editadas de uma paleta gerada. Musica, efeitos e vozes tem volumes independentes; dialogos reduzem a musica. Matrizes WAV preservadas em NightfallNative/AudioMasters/Suno-20261104 ficam fora dos pacotes publicos e entram no backup privado. Procedencia/hashes em NightfallNative/Content/audio/provenance.json.
 
 CTest 3/3, comparação de 100.800 passos com fontes C# preservadas e CI de Windows/Android aprovados. O emulador percorreu ambas as proporções, os dois heróis, pausa/retorno e configurações que persistem após reiniciar. Windows portátil renderizou os 16 mundos e as cinco categorias de configuração. As instalações existentes foram preservadas; o instalador atual teve recursos e conteúdo compilados, sem repetir a instalação neste host.
 
