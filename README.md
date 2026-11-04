@@ -1,12 +1,14 @@
 # Mike & Denyse: Nightfall
 
-## Port nativo C++ — 1.0.1 (03/11/2026)
+## Port nativo C++ — 1.1.0 (03/11/2026)
 
-`NightfallNative/` preserva o projeto Unity abaixo e usa o mesmo frontend C++20/raylib em Windows e Android. A versão 1.0.1 corrige o APK 1.0.0 que executava a simulação sem desenhar o jogo. Inclui menus por toque, multitouch, áudio, arte procedural derivada do original, progressão e cooperativo entre clientes nativos da mesma versão.
+`NightfallNative/` preserva o projeto Unity abaixo e usa o mesmo frontend C++20/raylib em Windows e Android. O executável Windows usa subsistema GUI e abre sem prompt. Configurações de tela, qualidade, áudio e controles ficam salvas no dispositivo; Windows oferece modos de janela, resolução, VSync, FPS e renderização interna até 4K. A simulação mantém 60 Hz, independentemente do limite de renderização.
 
-CTest, comparação de 100.800 passos contra fontes C# originais e CI hospedado passaram. Windows foi instalado/desinstalado em teste isolado, comparou os 80 arquivos ao ZIP e renderizou os 16 mundos. Android emulado passou em 16:9 e 5:3, com menus, os dois heróis, inputs, pausa/Voltar e mesmo processo após background/retorno; o APK ARM64 está assinado com a identidade existente. Toque/áudio/atualização em ARM64 físico e Wi-Fi em dois aparelhos continuam sem homologação. Publicação e backups são consolidados nos contextos do portal pelo coordenador.
+Android oferece controles por toque sempre visíveis, tamanho/opacidade/margem, modo canhoto e vibração. Mike e Denyse com suas armas identificam o APK em ícones tradicionais e adaptativos, assim como o executável e o instalador Windows. Os efeitos procedurais do original permanecem; trilhas e falas novas ainda dependem da etapa de produção de áudio.
 
-Comandos, escopo da comparação e limitações estão em [NightfallNative/docs/FIDELITY_REPAIR.md](NightfallNative/docs/FIDELITY_REPAIR.md).
+CTest 3/3, comparação de 100.800 passos com fontes C# preservadas e CI de Windows/Android aprovados. O emulador percorreu ambas as proporções, os dois heróis, pausa/retorno e configurações que persistem após reiniciar. Windows portátil renderizou os 16 mundos e as cinco categorias de configuração. As instalações existentes foram preservadas; o instalador atual teve recursos e conteúdo compilados, sem repetir a instalação neste host.
+
+Toque, áudio, desempenho e atualização instalada em ARM64 físico, além de Wi-Fi em dois aparelhos, seguem sem homologação. Comandos e limites da comparação estão em [NightfallNative/docs/FIDELITY_REPAIR.md](NightfallNative/docs/FIDELITY_REPAIR.md). Publicação e backups são consolidados no contexto do portal.
 
 ## Projeto Unity original
 

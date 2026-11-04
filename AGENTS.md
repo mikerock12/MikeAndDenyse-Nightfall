@@ -1,4 +1,11 @@
 # Mike & Denyse: Nightfall — Guia de Agentes (`AGENTS.md`)
+## Plataforma e icones Android — 03/11/2026
+
+Nightfall1.1.0 implementa configuracoes persistentes, icones APK tradicionais/adaptativos derivados dos dois personagens aprovados e executavel Windows GUI sem prompt. Render4K, janela/sem bordas/fullscreen, VSync/FPS, brilho, teclado P1/P2, dois gamepads e deadzone; Androidtouch ajustavel/canhoto/opacidade/margem e vibracao. Simulacao frontend fixa60Hz; Core/Unity preservados. Musica/voz aparecem quando houver conteudo; efeitos/volume geral ja efetivos. CTest3/3, gate PE GUI e CI41756274066 aprovados nos tresjobs. Androidemulado2proporcoes/34capturas com settings5categorias, preferencias apos reiniciar,2herois e pausa/ciclo de vida. Windows portatil16mundos+5settings reais; icones PE dos quatroEXEs/PNG interno e15PNG compilados por APK conferidos. APK ARM64 v2/v3 com certificado anterior e alinhamento16KiB. Instalacao Nightfallexistente preservada; reinstalacao nao repetida. Suno por ultimo conforme usuario, verificacao do site ainda impede gerar audio; nenhum clipnovo. Release/merge/portal/backup coordenados no portal.
+
+Sem homologacao Android fisica, audio ouvido, desempenho/toque fisicos ou dupla Wi-Fi. Responsavel: Codex.
+
+
 
 Em 03/11/2026, o CI 41589263103 expôs um gesto adb sem duração perdido no menu em GPU de software. O driver passa a injetar toque imóvel de 120 ms e aguardar a tela esperada por até 12 s, sem reenviar ações nem afrouxar a igualdade de estado. Aplicação e candidatos permanecem inalterados; repete-se o CI para esse ajuste de QA. Responsável: Codex.
 
