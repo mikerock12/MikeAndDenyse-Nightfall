@@ -1,5 +1,15 @@
 # MULTIAGENTS — Mike & Denyse: Nightfall
 
+## Nightfall1.2.0 publicado — 04/11/2026
+
+Release estavel [v1.2.0](https://github.com/mikerock12/MikeAndDenyse-Nightfall/releases/tag/v1.2.0), PR6/merge82bd25e619223ffee212842442f27f8706723153. Instalador e ZIP Windows, APK ARM64 e SHA256SUMS conferidos contra os digests remotos. Mesma identidade Android/v2/v3/16KiB e icones proprios; Windows GUI sem console. As releases anteriores permanecem imutaveis.
+
+Audio Suno aplicado:16 loops de cenario,51 cortes PT-BR (Mike/Denyse/17 chefes) e8 variantes editadas de uma paleta gerada. O proprietario ouviu/aprovou a amostra de voz. Volumes separados, musica reduzida no dialogo, pausa/background e uma musica/uma fala carregadas por vez. Regras C#/C++ e LAN preservados. Matrizes18WAV/292665120bytes em D:\PROJETOS\SoftwaresSmellsLikeTech\MikeAndDenyse\NightfallNative\AudioMasters\Suno-20261104, ignoradas no Git e nos pacotes; incluir no backup privado. Procedencia/hashes dos75OGGs em NightfallNative/Content/audio/provenance.json. Nao afirmar que a paleta original cumpriu os16segundos/oito eventos pedidos: ela tem4,72s e recebeu edicao local. Nenhuma compra/assinatura foi alterada ou voz pessoal clonada.
+
+CIs PR41795196087 e main41797055296 aprovados nos tres jobs; CTest3/3,100.800 passos contra C#/16mapas;75 payloads verificados noAPK, inicializacao real de musica/efeitos/banco noAndroid emulado16:9/5:3 com34capturas, ambos herois, preferencias,pausa/retorno. Audio-smoke do jogo Windows exit0 decodificou16streams/51falas/8efeitos e conferiu filas dos17chefes. Corrigida a orientacao Android transitoria com dimensoes fisicas antes do framebuffer; titulo e toques alinhados nas capturas reais. Windows portatil renderizou16mundos e cinco configuracoes; recursos PE/icone conferidos. Instalacoes existentes preservadas; nao afirmar nova reinstalacao desta release.
+
+Consolidacao dos backups privados de fontes/historico,pacotes,evidencias e matrizes pelo portal; recibos privados ficam somente em .work. Os registros anteriores de implementacao/publicacao pendente sao historicos. Sem homologacao em ARM64 fisico (atualizacao instalada,audio/desempenho,multitouch) nem coop entre dois aparelhos. Responsavel: Codex.
+
 Última atualização: 2026-08-29
 
 Registro vivo dos agentes, papéis, entregas e o que cada um já fez.  
