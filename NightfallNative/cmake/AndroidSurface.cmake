@@ -12,18 +12,28 @@ function(slt_android_buffer_geometry raylib_source)
     if(NOT _slt_hash STREQUAL "a17a8c75ffa9710dec042769191f07d0352af7de0c197adbcfa883d78d2234d8")
         message(FATAL_ERROR "Unexpected raylib Android backend; review the pinned 5.5 geometry patch")
     endif()
-    set(_slt_needle "                    CORE.Window.display.width = ANativeWindow_getWidth(platform.app->window);")
+    set(_slt_needle "                    CORE.Window.display.width = ANativeWindow_getWidth(platform.app->window);
+                    CORE.Window.display.height = ANativeWindow_getHeight(platform.app->window);")
     string(FIND "${_slt_backend}" "${_slt_needle}" _slt_position)
     if(_slt_position LESS 0)
         message(FATAL_ERROR "Pinned Android initialization site missing")
     endif()
-    set(_slt_patch "                    // SLT alteration: use the physical size supplied by the Activity before querying buffers.
+    set(_slt_patch "                    // SLT alteration: a rotation can still report portrait dimensions after a successful buffer resize.
+                    int reportedWidth = ANativeWindow_getWidth(platform.app->window);
+                    int reportedHeight = ANativeWindow_getHeight(platform.app->window);
                     if ((CORE.Window.screen.width > 1) && (CORE.Window.screen.height > 1))
                     {
                         int geometry = ANativeWindow_setBuffersGeometry(app->window, CORE.Window.screen.width, CORE.Window.screen.height, 0);
                         TRACELOG(LOG_INFO, \"ANDROID: SLT_BUFFER_GEOMETRY: %i x %i result=%i\", CORE.Window.screen.width, CORE.Window.screen.height, geometry);
+                        CORE.Window.display.width = CORE.Window.screen.width;
+                        CORE.Window.display.height = CORE.Window.screen.height;
                     }
-${_slt_needle}")
+                    else
+                    {
+                        CORE.Window.display.width = reportedWidth;
+                        CORE.Window.display.height = reportedHeight;
+                    }
+                    TRACELOG(LOG_INFO, \"ANDROID: SLT_PHYSICAL_RENDER_SIZE: %i x %i reported=%i x %i\", CORE.Window.display.width, CORE.Window.display.height, reportedWidth, reportedHeight);")
     string(REPLACE "${_slt_needle}" "${_slt_patch}" _slt_backend "${_slt_backend}")
     file(MAKE_DIRECTORY "${_slt_dir}/platforms")
     configure_file("${raylib_source}/src/rcore.c" "${_slt_dir}/rcore.c" COPYONLY)

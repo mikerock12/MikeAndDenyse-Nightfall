@@ -114,3 +114,19 @@ O gate pos-merge encontrou inicializacao intermitente com a imagem comprimida ve
 
 
 Em 04/11/2026, o log do segundo formato Nightfall comprovou NativeWindow temporaria de1x1, apesar de WindowMetrics1000x600. A raylib5.5 calculava screenScale com esse buffer temporario e mantinha o jogo preto/comprimido. cmake/AndroidSurface.cmake preserva o upstream imutavel (SHA-256 a17a8c75...) e compila apenas uma copia de rcore com ANativeWindow_setBuffersGeometry aplicado antes da consulta inicial de dimensoes. A alteracao e marcada no codigo gerado e no log SLT_BUFFER_GEOMETRY. Validacao em andamento, sem nova publicacao desta manutencao. Responsavel: Codex.
+
+## Audio Suno integrado — candidato1.2.0, 04/11/2026
+
+Produzidas32 versoes para16 trilhas no Suno v6;16 matrizes WAV exportadas e preservadas em NightfallNative/AudioMasters/Suno-20261104 (ignorado no Git, incluir no backup privado). Falas PT-BR em banco gerado no Suno: amostra ouvida e aprovada pelo proprietario,51 cortes para Mike/Denyse/17 chefes. Oito variantes de efeitos foram editadas a partir de uma paleta Suno de4,72s; nao afirmar que o gerador obedeceu ao pedido de16s/oito eventos isolados. Efeitos procedurais de interface/pickups continuam como fallback. Nenhuma voz pessoal foi clonada e nenhuma compra/assinatura alterada. A cota restante do plano existente foi usada nas exportacoes.
+
+OGGs distribuidos em Content/audio:16 loops com emenda1,5s/-22LUFS,51 falas/-17LUFS e8 efeitos derivados. Procedencia, hashes das matrizes e dos75 arquivos estao em provenance.json; scripts Import-SunoAudio.py e Import-SunoVoicesEffects.py registram o processamento. WAVs originais nao entram em Git/APK/instalador. Transcricao local auxiliou os cortes; a revisao do usuario da amostra, e nao o ASR isolado, aprovou as vozes.
+
+NativeAudio altera apenas apresentacao: musica por cenario, falas do heroi escolhido e chefe ao entrar na arena (dois herois no coop), musica reduzida durante dialogo, volume de musica/voz configuravel e pausa/retorno preservando reproducao. Carrega um stream musical e uma fala por vez, mantendo o buffer OGG vivo no Android. Assets Android usam AAssetManager e nomes ZIP portaveis. Regras C#/C++ e protocolo LAN intocados.
+
+Windows candidato compilado e audio-smoke real com exit0:16 streams,51 falas e8 efeitos decodificados; mapeamento dos17 chefes conferido. APK ARM64 compilado com os75 payloads SHA-256 iguais aos aprovados, assinado com certificado anterior/v2/v3/16KiB. CI foi ampliado para banco completo e inicializacao real de musica/efeitos no emulador; sua execucao e a publicacao1.2.0 ainda estao pendentes. Releases1.1.0/1.1.1 preservadas. Nao substituir evidencias das versoes anteriores por capturas novas sem procedencia. Sem homologacao Android fisica/dupla Wi-Fi e sem repetir instalacao no host que ja tem o jogo. Responsavel: Codex.
+
+## Rotacao Android ainda transitoria — correcao em validacao, 04/11/2026
+
+O CI Nightfall41793542473 passou Windows e builds Android/banco75, mas a captura de titulo mostrou compressao vertical. Log comprovou SLT_BUFFER_GEOMETRY960x540/result0 seguido de display540x960 e offsets0,656: ANativeWindow continuou reportando retrato durante a rotacao, mesmo apos aceitar o novo buffer. O audio inicializou corretamente (16musicas/51falas/8efeitos); ele nao explica o defeito visual.
+
+A copia identificada do backend raylib agora usa diretamente as dimensoes fisicas obtidas da Activity para SetupFramebuffer, conservando o tamanho bruto reportado apenas para diagnostico. A matriz nao deve incorporar a orientacao transitoria. Upstream5.5 e seu SHA continuam intactos. QA exige SLT_PHYSICAL_RENDER_SIZE igual a captura, alem das assertions visuais e toques existentes; nenhuma assertion foi afrouxada. Mesma correcao aplicada aos dois jogos: Nightfall1.2.0 ainda candidato e manutencao Rua de Aco0.4.1/code401, sem substituir tags0.4.0/1.1.1 publicadas. Novos gates/builds/publicacao pendentes. Responsavel: Codex.

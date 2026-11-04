@@ -17,6 +17,9 @@ jobs:
       - name: Run Python Progress & LanIp Tests
         run: python tools/test_progress.py
 
+      - name: Verify all Suno audio payloads and source hashes
+        run: python NightfallNative/tests/verify_audio_assets.py
+
       - name: Run Node Level Smoke (16 Worlds)
         run: node tools/smoke_levels.js
 
@@ -80,8 +83,8 @@ jobs:
           name: nightfall-android-candidates
           retention-days: 7
           path: |
-            NightfallNative/Saved/Packages/Release-1.1.1/*arm64-v8a-UNSIGNED.apk
-            NightfallNative/Saved/Packages/Release-1.1.1/*x86_64-QA.apk
+            NightfallNative/Saved/Packages/Release-1.2.0/*arm64-v8a-UNSIGNED.apk
+            NightfallNative/Saved/Packages/Release-1.2.0/*x86_64-QA.apk
 
   android-emulator-frontend:
     needs: build-android-frontend
@@ -110,8 +113,8 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -camera-back none
           script: |
-            python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.1.1-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence/16-9
-            ANDROID_SMOKE_SIZE=600x1000 python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.1.1-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence/5-3
+            python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.2.0-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence/16-9
+            ANDROID_SMOKE_SIZE=600x1000 python3 NightfallNative/tests/android_frontend_smoke.py candidate/MikeAndDenyse-1.2.0-Android-x86_64-QA.apk NightfallNative/Saved/emulator-evidence/5-3
       - uses: actions/upload-artifact@v4
         if: always()
         with:

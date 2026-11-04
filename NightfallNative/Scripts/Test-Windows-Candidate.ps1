@@ -1,4 +1,4 @@
-param([string]$Version='1.1.1')
+param([string]$Version='1.2.0')
 $ErrorActionPreference='Stop'
 $NativeRoot=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 $Packages=Join-Path $NativeRoot "Saved/Packages/Release-$Version"
