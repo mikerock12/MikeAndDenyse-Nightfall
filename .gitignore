@@ -88,3 +88,4 @@ NightfallNative/tests/reference/obj/
 nightfall_progress.cfg
 *.exe
 *.zip
+`n__pycache__/
