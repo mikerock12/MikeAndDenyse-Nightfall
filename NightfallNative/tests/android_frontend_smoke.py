@@ -15,12 +15,14 @@ import time
 import xml.etree.ElementTree as ET
 import zipfile
 from android_icons import verify as verify_icons
+from verify_audio_assets import verify as verify_audio
 from PIL import Image
 
 apk = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
 output.mkdir(parents=True, exist_ok=True)
 verify_icons(apk,Path(__file__).resolve().parents[1]/'Platform/Android',output)
+(output/'apk-audio.json').write_text(json.dumps(verify_audio(apk),indent=2)+'\n',encoding='utf-8')
 package = 'com.mikeanddenyse.nightfall.qa'
 activity = 'com.mikeanddenyse.nightfall.MainActivity'
 
@@ -136,6 +138,9 @@ def tap(x, y):
     adb('shell', 'input', 'swipe', *position, *position, '120')
     time.sleep(1)
 capture('01-title',0)
+audio_log=adb('logcat','-d','-s','raylib').decode('utf-8',errors='replace')
+for evidence in ['NIGHTFALL_AUDIO_BANK: music=16 voice=51','NIGHTFALL_CUSTOM_SFX: 8','NIGHTFALL_MUSIC: forest seconds=']:
+    assert evidence in audio_log, 'Actual Android audio initialization missing: '+evidence
 tap(810,502)
 assert "SLT_SETTINGS: opened mobile=1" in adb("logcat","-d","-s","raylib").decode(errors="replace"), "Settings did not open"
 for tab in range(5):

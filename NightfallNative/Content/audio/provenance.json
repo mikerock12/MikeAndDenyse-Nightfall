@@ -1,0 +1,1240 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-11-04T07:12:12.071511+00:00",
+  "generator": "Suno v6; user account with existing Pro subscription",
+  "transform": "1.5s loop crossfade, -22 LUFS / -2 dBTP / LRA8, stereo Vorbis q4 at44100Hz",
+  "originalWavIncludedInPublicPackage": false,
+  "music": [
+    {
+      "id": "forest",
+      "world": 1,
+      "title": "NF 01 - Floresta Amaldicoada",
+      "sunoUrl": "https://suno.com/song/3699d306-92dd-4b9a-bdc0-3a0cd8c3d116",
+      "masterFile": "NF 01 - Floresta Amaldicoada.wav",
+      "masterSha256": "3f923c01861dd43fc45670148d8217b3f0f7676dc082c5f543d301a09c04c9fa",
+      "masterSeconds": 100.0,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/forest.ogg",
+      "sha256": "3d0c8ccb61af61ac518dd0d249bc7621b491c4c82a19f4cead2a69eba8aab2a3",
+      "bytes": 1390346,
+      "loopSeconds": 98.5
+    },
+    {
+      "id": "cabin",
+      "world": 2,
+      "title": "NF 02 - Cabana da Bruxa",
+      "sunoUrl": "https://suno.com/song/c1ab3732-8521-4dd8-8a67-3a97e053f05c",
+      "masterFile": "NF 02 - Cabana da Bruxa.wav",
+      "masterSha256": "7219946ca5261f08af1b1d75fc57106fe53856ee24119918f2dbe1d64205962b",
+      "masterSeconds": 89.6,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/cabin.ogg",
+      "sha256": "e46b7078f92291a72285ffcb02c1bb4d15b2e0825d4e0e6674bc283964c24dc2",
+      "bytes": 1302164,
+      "loopSeconds": 88.1
+    },
+    {
+      "id": "swamp",
+      "world": 3,
+      "title": "NF 03 - Pantano de Ossos",
+      "sunoUrl": "https://suno.com/song/ae9cf075-d87a-4e08-a91c-0aaafbfef926",
+      "masterFile": "NF 03 - Pantano de Ossos.wav",
+      "masterSha256": "33750221281a93d4f5817fedde94bb9b2cba95f539fb7d59cff849838789b8c2",
+      "masterSeconds": 69.88,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/swamp.ogg",
+      "sha256": "9cc558d9cf46127add1bd8cfb1884d0320c8f6b0e92298d275488cda77663d32",
+      "bytes": 935094,
+      "loopSeconds": 68.38
+    },
+    {
+      "id": "desert",
+      "world": 4,
+      "title": "NF 04 - Deserto de Cinzas",
+      "sunoUrl": "https://suno.com/song/79667987-a20a-41ba-b1bc-575b5ff49aae",
+      "masterFile": "NF 04 - Deserto de Cinzas.wav",
+      "masterSha256": "d70fa5bf2dbd38361f440199b937567e420dcba589aabccc0cc7b0bb8aeb8b5e",
+      "masterSeconds": 58.12,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/desert.ogg",
+      "sha256": "dcea34275079303a0e99ba010ec3e7009b55bb25b31c35af42285d672e761a2e",
+      "bytes": 851648,
+      "loopSeconds": 56.62
+    },
+    {
+      "id": "grave",
+      "world": 5,
+      "title": "NF 05 - Cemiterio Sombrio",
+      "sunoUrl": "https://suno.com/song/53871934-18ac-4af4-a502-740b2438f75b",
+      "masterFile": "NF 05 - Cemiterio Sombrio.wav",
+      "masterSha256": "4d3d8ac8c2bfc10bd779a9684f34613782b3ea146912e035237a4f77e6e62224",
+      "masterSeconds": 87.2,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/grave.ogg",
+      "sha256": "6d986f36a310be7c53529ee4baf9a5d4b2bfb0fd51075aed393637cbc5b441b9",
+      "bytes": 1304080,
+      "loopSeconds": 85.7
+    },
+    {
+      "id": "castle",
+      "world": 6,
+      "title": "NF 06 - Castelo Vampirico",
+      "sunoUrl": "https://suno.com/song/fa6fa7bd-c6de-43e2-9caa-d806b5689f85",
+      "masterFile": "NF 06 - Castelo Vampirico.wav",
+      "masterSha256": "80e1414cbd2ca50bf00573adb816dcb1b1d7a150cb4fee33c09dac042d6bb068",
+      "masterSeconds": 71.68,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/castle.ogg",
+      "sha256": "817632d4e7f6382c3d5f2251fa56e92a6e99b959760adc33615792b183a1777c",
+      "bytes": 1074425,
+      "loopSeconds": 70.18
+    },
+    {
+      "id": "ice",
+      "world": 7,
+      "title": "NF 07 - Ermos Congelados",
+      "sunoUrl": "https://suno.com/song/a23b2ba9-fedd-462c-a5ea-67be7560e25d",
+      "masterFile": "NF 07 - Ermos Congelados.wav",
+      "masterSha256": "058c50d8a57d62c144665bbeb365e41ac990de5b817b0974be2f680077fbc726",
+      "masterSeconds": 66.8,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/ice.ogg",
+      "sha256": "74162f2d005845a5c822c67acae693b3a340c6672e0639160fcc2ee4a3b92f00",
+      "bytes": 892152,
+      "loopSeconds": 65.3
+    },
+    {
+      "id": "volcano",
+      "world": 8,
+      "title": "NF 08 - Inferno Vulcanico",
+      "sunoUrl": "https://suno.com/song/6d6b4462-d786-4888-b47f-845f6720a36e",
+      "masterFile": "NF 08 - Inferno Vulcanico.wav",
+      "masterSha256": "899220d5c3f3bfffd72fa7f89828b21079eb0a8fee14e4e4b1b1aedb46860ba1",
+      "masterSeconds": 67.28,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/volcano.ogg",
+      "sha256": "97c6036f52cc00c51642f115dc8670eb71bcb9ee5eab4c890dbe49817e20ccd0",
+      "bytes": 969855,
+      "loopSeconds": 65.78
+    },
+    {
+      "id": "coven",
+      "world": 9,
+      "title": "NF 09 - Covil das Bruxas",
+      "sunoUrl": "https://suno.com/song/19ca56eb-473e-46f1-9531-90ede8f31162",
+      "masterFile": "NF 09 - Covil das Bruxas.wav",
+      "masterSha256": "4abc24536c3dc047d4b43864526417522af2d3c7cd60aade9154907c57fd5f2a",
+      "masterSeconds": 96.4,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/coven.ogg",
+      "sha256": "7c37d2ef0e80e22ef1b0aaafb90146e70617ec7ae42c3ada843dd38634b2d966",
+      "bytes": 1430763,
+      "loopSeconds": 94.9
+    },
+    {
+      "id": "catacombs",
+      "world": 10,
+      "title": "NF 10 - Catacumbas Afogadas",
+      "sunoUrl": "https://suno.com/song/daea3432-d141-4162-9297-58655833bc7e",
+      "masterFile": "NF 10 - Catacumbas Afogadas.wav",
+      "masterSha256": "417242a314d57950436623c853b8add89351254b8cd36729f6410be3f57c60cc",
+      "masterSeconds": 83.92,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/catacombs.ogg",
+      "sha256": "ab18e51e1d46dfde47ae094686a38c130ee8da577fcef8c8c1901ad7f5a67967",
+      "bytes": 1097720,
+      "loopSeconds": 82.42
+    },
+    {
+      "id": "woods",
+      "world": 11,
+      "title": "NF 11 - Bosque do Lobisomem",
+      "sunoUrl": "https://suno.com/song/bf530263-61b1-41c6-b3de-cb5c64034076",
+      "masterFile": "NF 11 - Bosque do Lobisomem.wav",
+      "masterSha256": "f1265e2c0bd90ce4a002fc2e7b0cd72bc807f0442ae73c535566189f2ca123bc",
+      "masterSeconds": 75.2,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/woods.ogg",
+      "sha256": "023351993f2afaad1767a14c9c5c12885f424c36b80d93df7b30637e05bab842",
+      "bytes": 1095335,
+      "loopSeconds": 73.7
+    },
+    {
+      "id": "peak",
+      "world": 12,
+      "title": "NF 12 - Pico do Dragao",
+      "sunoUrl": "https://suno.com/song/39080821-a55d-4402-9dba-8b6bc99a66bc",
+      "masterFile": "NF 12 - Pico do Dragao.wav",
+      "masterSha256": "e2f40bfbee57b477a6733f0e4334e10205bb1a20a286cec4b66296c854b0f270",
+      "masterSeconds": 103.2,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/peak.ogg",
+      "sha256": "92a7a17aa76229159613b954382f200e86d8a1dd0d28169d9220d9ffb932e90c",
+      "bytes": 1514062,
+      "loopSeconds": 101.7
+    },
+    {
+      "id": "cathedral",
+      "world": 13,
+      "title": "NF 13 - Catedral Demoniaca",
+      "sunoUrl": "https://suno.com/song/bef4a51d-e2c5-4d0d-9c3d-299ff527b330",
+      "masterFile": "NF 13 - Catedral Demoniaca.wav",
+      "masterSha256": "fb1bf4845fc9d9d6db98d0c89fbd2a7ffae6cf2085c8b876afc2786f2030ba50",
+      "masterSeconds": 78.24,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/cathedral.ogg",
+      "sha256": "91f1050f82110a6479faf8543dc65dc2063fc14c8f0b8e22524baeea7abbbfa6",
+      "bytes": 1129366,
+      "loopSeconds": 76.74
+    },
+    {
+      "id": "village",
+      "world": 14,
+      "title": "NF 14 - Vila da Lua de Sangue",
+      "sunoUrl": "https://suno.com/song/a2667e95-9844-441e-b1cb-9010f0205449",
+      "masterFile": "NF 14 - Vila da Lua de Sangue.wav",
+      "masterSha256": "be5230c83428cc7a533a5dedefac4b950f4ae4df41dce43d2deb5153f3e2a62c",
+      "masterSeconds": 88.8,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/village.ogg",
+      "sha256": "c8e698af80dd3fd136ce763b60bdd7c4d1e13160190990919232d5ddd0a17bac",
+      "bytes": 1268019,
+      "loopSeconds": 87.3
+    },
+    {
+      "id": "abyss",
+      "world": 15,
+      "title": "NF 15 - Cavernas do Abismo",
+      "sunoUrl": "https://suno.com/song/95472039-4d59-4b25-9e6e-31110d837586",
+      "masterFile": "NF 15 - Cavernas do Abismo.wav",
+      "masterSha256": "0956cb3d76125294e500ab99fbaaf709c529138032ddc0043ec78817cba9fda7",
+      "masterSeconds": 80.0,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/abyss.ogg",
+      "sha256": "3bf76594fc82914cbdb417384e82bc80cc2e33f328750c76d9d2196edd13b97c",
+      "bytes": 1155743,
+      "loopSeconds": 78.5
+    },
+    {
+      "id": "throne",
+      "world": 16,
+      "title": "NF 16 - Trono Infernal",
+      "sunoUrl": "https://suno.com/song/d781dde9-c115-4948-97f3-16fd2363a345",
+      "masterFile": "NF 16 - Trono Infernal.wav",
+      "masterSha256": "d331f024d15d337e6bad738e45c718cbdf9ab9190ecb7bacf321652583fa146a",
+      "masterSeconds": 92.4,
+      "masterRate": 48000,
+      "masterChannels": 2,
+      "file": "music/throne.ogg",
+      "sha256": "9c062650a2f4eb2434b806bb414cb68dff31ad7377fe664944a5b2eb54a40c5a",
+      "bytes": 1338686,
+      "loopSeconds": 90.9
+    }
+  ],
+  "voices": [
+    {
+      "file": "voices/mike_treant.ogg",
+      "sha256": "83bb372629f0a470c21004cfdeb8f7a69526093125c5853873cd8f7dceb8b0f7",
+      "bytes": 59094,
+      "sourceSeconds": [
+        0,
+        6.12
+      ],
+      "id": "mike_treant",
+      "speaker": "mike",
+      "boss": "treant",
+      "requestedScript": "As raízes estão se movendo. Fique perto, Denyse.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_treant.ogg",
+      "sha256": "59d0b54a1676b68a318b11b7382cebe273bdab312b119650aca7205432718d38",
+      "bytes": 42126,
+      "sourceSeconds": [
+        6.12,
+        10.2
+      ],
+      "id": "denyse_treant",
+      "speaker": "denyse",
+      "boss": "treant",
+      "requestedScript": "Eu sinto o medo preso nesta floresta.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_treant.ogg",
+      "sha256": "4c03a9f977ae983efbf700d448e05d542e69a46e913141a4ea5d03017ba4eb4f",
+      "bytes": 37017,
+      "sourceSeconds": [
+        10.2,
+        13.68
+      ],
+      "id": "boss_treant",
+      "speaker": "boss",
+      "boss": "treant",
+      "requestedScript": "Minha floresta beberá a luz de vocês!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_babawitch.ogg",
+      "sha256": "9644a3d7b49ab6dcb1dc0ffb64107a73cd15dc1367e7deef8842b30ce7c28985",
+      "bytes": 28206,
+      "sourceSeconds": [
+        13.68,
+        16.34
+      ],
+      "id": "mike_babawitch",
+      "speaker": "mike",
+      "boss": "babawitch",
+      "requestedScript": "Essa cabana não vai nos prender.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_babawitch.ogg",
+      "sha256": "801360a1f9043173690979c2ffc61ff3aa8cba6b0aee4a54df22a2760ba897f2",
+      "bytes": 27343,
+      "sourceSeconds": [
+        16.34,
+        18.75
+      ],
+      "id": "denyse_babawitch",
+      "speaker": "denyse",
+      "boss": "babawitch",
+      "requestedScript": "Seus feitiços terminam aqui, Baba.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_babawitch.ogg",
+      "sha256": "2ef02e9034a471c9a37bde999a9811590ea08f14086b98a8262fe3fe5405d2f5",
+      "bytes": 55756,
+      "sourceSeconds": [
+        18.75,
+        24.24
+      ],
+      "id": "boss_babawitch",
+      "speaker": "boss",
+      "boss": "babawitch",
+      "requestedScript": "Entrem, crianças. O caldeirão já está esperando!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_hydra.ogg",
+      "sha256": "583bd19b0d0a002096353ce57d95c263258d0eff055398a857d5f6da4843f98a",
+      "bytes": 27384,
+      "sourceSeconds": [
+        24.24,
+        26.68
+      ],
+      "id": "mike_hydra",
+      "speaker": "mike",
+      "boss": "hydra",
+      "requestedScript": "Uma cabeça de cada vez.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_hydra.ogg",
+      "sha256": "d62a6e176135bec38beef304451a61e4446026523978f57766b3801e4f84048f",
+      "bytes": 25900,
+      "sourceSeconds": [
+        26.68,
+        28.96
+      ],
+      "id": "denyse_hydra",
+      "speaker": "denyse",
+      "boss": "hydra",
+      "requestedScript": "Vou selar o veneno deste pântano.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_hydra.ogg",
+      "sha256": "10c73d6f93ac1edbf0fe66f022477981b2298cd0b68e7111f616b65383c2ae05",
+      "bytes": 37728,
+      "sourceSeconds": [
+        28.96,
+        32.36
+      ],
+      "id": "boss_hydra",
+      "speaker": "boss",
+      "boss": "hydra",
+      "requestedScript": "Afundem nos ossos dos que vieram antes!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_pharaoh.ogg",
+      "sha256": "0bf712bdbbe723a7f399e0c9986da374796880667f67b07e3ed60eedd3dbe961",
+      "bytes": 44017,
+      "sourceSeconds": [
+        32.36,
+        36.96
+      ],
+      "id": "mike_pharaoh",
+      "speaker": "mike",
+      "boss": "pharaoh",
+      "requestedScript": "Nem suas cinzas vão esconder você.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_pharaoh.ogg",
+      "sha256": "cae9ad643e34f14983543578219aa955aeb3d6b1f10cea381b60b334a18df966",
+      "bytes": 32534,
+      "sourceSeconds": [
+        36.96,
+        39.92
+      ],
+      "id": "denyse_pharaoh",
+      "speaker": "denyse",
+      "boss": "pharaoh",
+      "requestedScript": "O deserto vai se lembrar da nossa luz.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_pharaoh.ogg",
+      "sha256": "c778052c175a8eaf05164a9b6221be8fd36da79173e9f9cfc82c0f876ee64dda",
+      "bytes": 37933,
+      "sourceSeconds": [
+        39.92,
+        43.68
+      ],
+      "id": "boss_pharaoh",
+      "speaker": "boss",
+      "boss": "pharaoh",
+      "requestedScript": "Ajoelhem-se diante do faraó eterno!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_gravetitan.ogg",
+      "sha256": "197ebf8f0d437106c41e67b17ce49bcc2f7f04553e8865974ba101987eae4d86",
+      "bytes": 33787,
+      "sourceSeconds": [
+        43.68,
+        46.88
+      ],
+      "id": "mike_gravetitan",
+      "speaker": "mike",
+      "boss": "gravetitan",
+      "requestedScript": "Os mortos merecem descanso.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_gravetitan.ogg",
+      "sha256": "8dbef74605cd976f526481cf6f6a5b3243032023a96702af1c4f3c2e7c939461",
+      "bytes": 28913,
+      "sourceSeconds": [
+        46.88,
+        49.48
+      ],
+      "id": "denyse_gravetitan",
+      "speaker": "denyse",
+      "boss": "gravetitan",
+      "requestedScript": "Vamos quebrar as correntes desta cova.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_gravetitan.ogg",
+      "sha256": "e082ad79b41866882d0998e7a22ab41d8ab79b9cce6b86a2252fce8678239f17",
+      "bytes": 46514,
+      "sourceSeconds": [
+        49.48,
+        54.04
+      ],
+      "id": "boss_gravetitan",
+      "speaker": "boss",
+      "boss": "gravetitan",
+      "requestedScript": "Seu último passo será sobre a própria sepultura!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_nosferatu.ogg",
+      "sha256": "9491ae8d101f04e9d502c6ade476f1a82d406c8ff78a06a2d7ef16030fa4de8d",
+      "bytes": 25765,
+      "sourceSeconds": [
+        54.04,
+        56.44
+      ],
+      "id": "mike_nosferatu",
+      "speaker": "mike",
+      "boss": "nosferatu",
+      "requestedScript": "Sua noite acaba agora, conde.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_nosferatu.ogg",
+      "sha256": "942fc56e5dc4bc238364c646a78e64a683d458ef1ac6fd6b9c2a7c6939494e78",
+      "bytes": 39702,
+      "sourceSeconds": [
+        56.44,
+        60.16
+      ],
+      "id": "denyse_nosferatu",
+      "speaker": "denyse",
+      "boss": "nosferatu",
+      "requestedScript": "Este castelo verá o amanhecer.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_nosferatu.ogg",
+      "sha256": "8ebf033334fe195811219bbda2350e4aeb4515db56bc9914d46bfece83047543",
+      "bytes": 57524,
+      "sourceSeconds": [
+        60.16,
+        66.16
+      ],
+      "id": "boss_nosferatu",
+      "speaker": "boss",
+      "boss": "nosferatu",
+      "requestedScript": "O sangue de vocês coroará meu banquete!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_icequeen.ogg",
+      "sha256": "1d55da2978893b8d2bbfdb8a0350ae478f4a848160263d2fa1c240b346acc356",
+      "bytes": 29248,
+      "sourceSeconds": [
+        66.16,
+        68.92
+      ],
+      "id": "mike_icequeen",
+      "speaker": "mike",
+      "boss": "icequeen",
+      "requestedScript": "Meu aço ainda está quente.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_icequeen.ogg",
+      "sha256": "e25d5d64806baa9976d4ce76ae5d23b1f418beea4de2aa96e14621ea745637c2",
+      "bytes": 26864,
+      "sourceSeconds": [
+        68.92,
+        71.32
+      ],
+      "id": "denyse_icequeen",
+      "speaker": "denyse",
+      "boss": "icequeen",
+      "requestedScript": "Nenhum inverno congela este cristal.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_icequeen.ogg",
+      "sha256": "ff20faf6065be13081c56fd9961385c7bccc9236ab789a75bb04a8637f2b4dc8",
+      "bytes": 56589,
+      "sourceSeconds": [
+        71.32,
+        76.84
+      ],
+      "id": "boss_icequeen",
+      "speaker": "boss",
+      "boss": "icequeen",
+      "requestedScript": "Um suspiro, e vocês serão estátuas de gelo!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_magmatitan.ogg",
+      "sha256": "bc3b2d0ec947136d43fe3fef1fc60c8b8a05d612d06c05297a0af94848ebc3cf",
+      "bytes": 27097,
+      "sourceSeconds": [
+        76.84,
+        79.28
+      ],
+      "id": "mike_magmatitan",
+      "speaker": "mike",
+      "boss": "magmatitan",
+      "requestedScript": "Vamos apagar essa fornalha.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_magmatitan.ogg",
+      "sha256": "879293f522346cf5dcbe2e8ef79f7691fc3ad626c5b72acb5e049e94bfbc05ce",
+      "bytes": 29937,
+      "sourceSeconds": [
+        79.28,
+        82
+      ],
+      "id": "denyse_magmatitan",
+      "speaker": "denyse",
+      "boss": "magmatitan",
+      "requestedScript": "Até a lava se curva à minha magia.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_magmatitan.ogg",
+      "sha256": "73d07b234a1edc4f3bc3d039a72a5449544424499153e3d64f79559e9a078c45",
+      "bytes": 31697,
+      "sourceSeconds": [
+        82,
+        84.9
+      ],
+      "id": "boss_magmatitan",
+      "speaker": "boss",
+      "boss": "magmatitan",
+      "requestedScript": "Eu sou a fúria que arde debaixo do mundo!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_morgana.ogg",
+      "sha256": "3bcca46ea4bb8ad3751d6ac6f89b30a608da53a3aef8d5e1b58685400dbe254d",
+      "bytes": 46627,
+      "sourceSeconds": [
+        86.6,
+        91.44
+      ],
+      "id": "mike_morgana",
+      "speaker": "mike",
+      "boss": "morgana",
+      "requestedScript": "Denyse, eu cubro você.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_morgana.ogg",
+      "sha256": "9a60339cb470c42dcc543de4f71bfebb81c4afd6802919c8ea682e2c8a62d881",
+      "bytes": 41518,
+      "sourceSeconds": [
+        91.44,
+        95.36
+      ],
+      "id": "denyse_morgana",
+      "speaker": "denyse",
+      "boss": "morgana",
+      "requestedScript": "Morgana, não temo mais suas sombras.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_morgana.ogg",
+      "sha256": "d89afbeb9c4451ff1c2b9dffdba5345704013997bf2a8e878fd0c4b7c290a4e4",
+      "bytes": 52051,
+      "sourceSeconds": [
+        95.36,
+        100.68
+      ],
+      "id": "boss_morgana",
+      "speaker": "boss",
+      "boss": "morgana",
+      "requestedScript": "Pequena bruxa, seu cristal será meu!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_drownedking.ogg",
+      "sha256": "b0c8758033249bea54eb88f9a8b3cbd7991652d99629b58188c7ec73929168c8",
+      "bytes": 33246,
+      "sourceSeconds": [
+        100.68,
+        103.8
+      ],
+      "id": "mike_drownedking",
+      "speaker": "mike",
+      "boss": "drownedking",
+      "requestedScript": "Não vamos nos afogar aqui.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_drownedking.ogg",
+      "sha256": "7fc7999ae25457bf9b3708e8894b6e8be7fb9fbe372a18d9154f8781e21277a1",
+      "bytes": 38744,
+      "sourceSeconds": [
+        103.8,
+        107.4
+      ],
+      "id": "denyse_drownedking",
+      "speaker": "denyse",
+      "boss": "drownedking",
+      "requestedScript": "Ouço as almas presas debaixo da água.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_drownedking.ogg",
+      "sha256": "8a701f9eb6c19a68628303d2d8b55137b5a0703bffeaa4bf3aa7903cc74d305a",
+      "bytes": 58996,
+      "sourceSeconds": [
+        107.4,
+        113.2
+      ],
+      "id": "boss_drownedking",
+      "speaker": "boss",
+      "boss": "drownedking",
+      "requestedScript": "Respirem fundo. Será a última vez!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_alpha.ogg",
+      "sha256": "f69986eb8fc6b54b4cdef933f5b36af25c7c4ae69046a370654e8be9433c2379",
+      "bytes": 26812,
+      "sourceSeconds": [
+        113.2,
+        115.665
+      ],
+      "id": "mike_alpha",
+      "speaker": "mike",
+      "boss": "alpha",
+      "requestedScript": "Pode uivar. Eu não recuo.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_alpha.ogg",
+      "sha256": "a39cf210b92d928901a4917065eef24576c09bc936b0ee1157efc5618a9de7f3",
+      "bytes": 36930,
+      "sourceSeconds": [
+        115.665,
+        119.04
+      ],
+      "id": "denyse_alpha",
+      "speaker": "denyse",
+      "boss": "alpha",
+      "requestedScript": "A lua não esconde sua fraqueza.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_alpha.ogg",
+      "sha256": "1a4440a6065d7ae62b22520c42487ad5ad9a2c0dcce5da2ca7dbbb92db9b9593",
+      "bytes": 63278,
+      "sourceSeconds": [
+        119.04,
+        125.44
+      ],
+      "id": "boss_alpha",
+      "speaker": "boss",
+      "boss": "alpha",
+      "requestedScript": "Esta é minha caçada. Vocês são a presa!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_dragon.ogg",
+      "sha256": "09f7962a167ee1ea6f4222073282cf942334fc588cf8062ccca7486e991f0751",
+      "bytes": 41818,
+      "sourceSeconds": [
+        125.44,
+        129.52
+      ],
+      "id": "mike_dragon",
+      "speaker": "mike",
+      "boss": "dragon",
+      "requestedScript": "As asas são grandes. A queda também.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_dragon.ogg",
+      "sha256": "b85a1c609077c9500169cc33a10ee16c1cb241c72737a66773e3e6eb08c3362e",
+      "bytes": 32584,
+      "sourceSeconds": [
+        129.52,
+        132.64
+      ],
+      "id": "denyse_dragon",
+      "speaker": "denyse",
+      "boss": "dragon",
+      "requestedScript": "Vou abrir caminho entre as chamas.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_dragon.ogg",
+      "sha256": "e22a61e0be8ac90ba8ea690c1082cd63ff8e95b96ea540bd121e7f5e40b75a28",
+      "bytes": 48444,
+      "sourceSeconds": [
+        132.64,
+        137.52
+      ],
+      "id": "boss_dragon",
+      "speaker": "boss",
+      "boss": "dragon",
+      "requestedScript": "Minhas chamas apagarão seus nomes!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_cathedral.ogg",
+      "sha256": "ccb52fea7d088ec1a5457dabce999434d377e4fd78b37213a07e54750a78a35c",
+      "bytes": 33449,
+      "sourceSeconds": [
+        137.52,
+        140.68
+      ],
+      "id": "mike_cathedral",
+      "speaker": "mike",
+      "boss": "cathedral",
+      "requestedScript": "Nenhum demônio vai passar por nós.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_cathedral.ogg",
+      "sha256": "881f0d831cdd4717af8942fd394b2d7eba0243051a9a7c2b263f12f39124cac9",
+      "bytes": 34219,
+      "sourceSeconds": [
+        140.68,
+        143.88
+      ],
+      "id": "denyse_cathedral",
+      "speaker": "denyse",
+      "boss": "cathedral",
+      "requestedScript": "Esta catedral ainda pode ser purificada.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_cathedral.ogg",
+      "sha256": "8d79cc15eacc12ad4cddec0fe57f1e6bf204a78908e4fd6373b722977ae3bcdb",
+      "bytes": 53746,
+      "sourceSeconds": [
+        143.88,
+        149.4
+      ],
+      "id": "boss_cathedral",
+      "speaker": "boss",
+      "boss": "cathedral",
+      "requestedScript": "Aqui, até suas preces pertencem a mim!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_priestess.ogg",
+      "sha256": "2dfcafae3c856e29d4c181ba6b36a6d253cefd9b42d34da4d3d186ae27fead2d",
+      "bytes": 51739,
+      "sourceSeconds": [
+        149.4,
+        154.8
+      ],
+      "id": "mike_priestess",
+      "speaker": "mike",
+      "boss": "priestess",
+      "requestedScript": "Essa lua não decide nosso destino.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_priestess.ogg",
+      "sha256": "5e859a95b72c82fe33302b2f600bf520f9b078dbb7f11c98bf0c8653dceba661",
+      "bytes": 37948,
+      "sourceSeconds": [
+        154.8,
+        158.6
+      ],
+      "id": "denyse_priestess",
+      "speaker": "denyse",
+      "boss": "priestess",
+      "requestedScript": "Seu ritual acaba nesta noite.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_priestess.ogg",
+      "sha256": "a4208385d5abf1cd6cd19f7e438075ef7aa2c68ec242b4ed710a43c016c5d00a",
+      "bytes": 33600,
+      "sourceSeconds": [
+        158.6,
+        161.76
+      ],
+      "id": "boss_priestess",
+      "speaker": "boss",
+      "boss": "priestess",
+      "requestedScript": "Cada gota de sangue alimenta minha lua!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_leviathan.ogg",
+      "sha256": "dc8e72cefba21d14b76cbf3d9af3ee6cab7c02ccf6324a907d851f9175ace15a",
+      "bytes": 37232,
+      "sourceSeconds": [
+        161.76,
+        165.28
+      ],
+      "id": "mike_leviathan",
+      "speaker": "mike",
+      "boss": "leviathan",
+      "requestedScript": "Eu sigo sua luz, Denyse.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_leviathan.ogg",
+      "sha256": "c39d888e4d96009333be52af847f8648ed3b1b97814534cf1c9149c72a5ff6b4",
+      "bytes": 35308,
+      "sourceSeconds": [
+        165.28,
+        168.6
+      ],
+      "id": "denyse_leviathan",
+      "speaker": "denyse",
+      "boss": "leviathan",
+      "requestedScript": "O abismo vai aprender a temer o cristal.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_leviathan.ogg",
+      "sha256": "8313428583a3fcbbd56bd244826c3773722b868ed489f42cbc2a075e52340ab9",
+      "bytes": 60251,
+      "sourceSeconds": [
+        168.6,
+        174.72
+      ],
+      "id": "boss_leviathan",
+      "speaker": "boss",
+      "boss": "leviathan",
+      "requestedScript": "Nas profundezas, ninguém ouvirá vocês gritar!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_warden.ogg",
+      "sha256": "c6a250281389b3b90154c88123a4c93beae46a542b4780362efae9d0cffbb581",
+      "bytes": 28737,
+      "sourceSeconds": [
+        174.72,
+        177.4
+      ],
+      "id": "mike_warden",
+      "speaker": "mike",
+      "boss": "warden",
+      "requestedScript": "Abra o caminho. Nós chegamos ao fim.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_warden.ogg",
+      "sha256": "e72ab1dbdcc9c14ab33e4a515913ea18eea3357efa5453d06939cebe6d59b50a",
+      "bytes": 33023,
+      "sourceSeconds": [
+        177.4,
+        180.48
+      ],
+      "id": "denyse_warden",
+      "speaker": "denyse",
+      "boss": "warden",
+      "requestedScript": "Belial não pode mais se esconder.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_warden.ogg",
+      "sha256": "818e081030c0694b53806c36cf67b083ad3e0df3a12fe223b0a1aed34ebc42bc",
+      "bytes": 50026,
+      "sourceSeconds": [
+        180.48,
+        185.64
+      ],
+      "id": "boss_warden",
+      "speaker": "boss",
+      "boss": "warden",
+      "requestedScript": "Ninguém atravessa meu portão e continua vivo!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/mike_belial.ogg",
+      "sha256": "cf0f5bb97ac0597667bb33f51c05e45883e60a398c21acbbdc596f691e326047",
+      "bytes": 40207,
+      "sourceSeconds": [
+        185.64,
+        189.76
+      ],
+      "id": "mike_belial",
+      "speaker": "mike",
+      "boss": "belial",
+      "requestedScript": "Não somos seus pesadelos, Belial.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/denyse_belial.ogg",
+      "sha256": "257ed2cb3550fca1a4b2df3426cb8e6408dbd877b26bba586e97febc299dff21",
+      "bytes": 48366,
+      "sourceSeconds": [
+        189.76,
+        194.6
+      ],
+      "id": "denyse_belial",
+      "speaker": "denyse",
+      "boss": "belial",
+      "requestedScript": "Somos a luz que você não conseguiu apagar.",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    },
+    {
+      "file": "voices/boss_belial.ogg",
+      "sha256": "6c4f1ab3e110ac7160f0edb7d95718da5d35e1bbe9ce2a661b9dc207271b11b0",
+      "bytes": 77072,
+      "sourceSeconds": [
+        194.6,
+        202.76
+      ],
+      "id": "boss_belial",
+      "speaker": "boss",
+      "boss": "belial",
+      "requestedScript": "Eu sou o senhor dos pesadelos. Esta noite nunca termina!",
+      "sunoUrl": "https://suno.com/song/62c2e06a-6bff-4c32-84cf-ff5d601ab46a",
+      "masterFile": "A Luz que Você Não Conseguiu.wav",
+      "masterSha256": "1f34ddfa9098f2157bdc2da0828837e757f47a70f45e3d9dbdcd5e40be9c1e87",
+      "ownerReviewedCandidate": true
+    }
+  ],
+  "effects": [
+    {
+      "file": "sfx/attack.ogg",
+      "sha256": "f7b1402885e2cc6d46e1d674a407b2872e9ba87c378c72f1083486409ddacdf6",
+      "bytes": 7813,
+      "sourceSeconds": [
+        0,
+        0.68
+      ],
+      "id": "attack",
+      "sunoUrl": "https://suno.com/song/95dc9003-08e9-40ab-a66f-03765eb7be87",
+      "masterFile": "Nightfall Sound-design Sample Sheet, Not Music. A 16-second Loop With 8 Separ....wav",
+      "masterSha256": "2813b9bc3c3d9132e75fa14ed83294a5ad45602d79dd7eac1f12539edb7a6e2a",
+      "transform": "highpass=f=180,lowpass=f=8500",
+      "sourceType": "edited variant from generated sound-design palette"
+    },
+    {
+      "file": "sfx/magic.ogg",
+      "sha256": "50673bb9fe91c303be05349d6cc8abb137915a9750cbfff627ba3a6f32d63e7c",
+      "bytes": 7992,
+      "sourceSeconds": [
+        0.6,
+        1.22
+      ],
+      "id": "magic",
+      "sunoUrl": "https://suno.com/song/95dc9003-08e9-40ab-a66f-03765eb7be87",
+      "masterFile": "Nightfall Sound-design Sample Sheet, Not Music. A 16-second Loop With 8 Separ....wav",
+      "masterSha256": "2813b9bc3c3d9132e75fa14ed83294a5ad45602d79dd7eac1f12539edb7a6e2a",
+      "transform": "asetrate=57600,highpass=f=650,lowpass=f=10000",
+      "sourceType": "edited variant from generated sound-design palette"
+    },
+    {
+      "file": "sfx/stomp.ogg",
+      "sha256": "286e07c276d53123e4f900b8521852f066672c1f3bdb391698310d82685ba971",
+      "bytes": 5959,
+      "sourceSeconds": [
+        1.18,
+        1.92
+      ],
+      "id": "stomp",
+      "sunoUrl": "https://suno.com/song/95dc9003-08e9-40ab-a66f-03765eb7be87",
+      "masterFile": "Nightfall Sound-design Sample Sheet, Not Music. A 16-second Loop With 8 Separ....wav",
+      "masterSha256": "2813b9bc3c3d9132e75fa14ed83294a5ad45602d79dd7eac1f12539edb7a6e2a",
+      "transform": "asetrate=36000,lowpass=f=1500",
+      "sourceType": "edited variant from generated sound-design palette"
+    },
+    {
+      "file": "sfx/hit.ogg",
+      "sha256": "5f35e686949ee09672c3cf192e43170a843e7efffb6a10ff3c34c4a4e74dec74",
+      "bytes": 7291,
+      "sourceSeconds": [
+        1.82,
+        2.48
+      ],
+      "id": "hit",
+      "sunoUrl": "https://suno.com/song/95dc9003-08e9-40ab-a66f-03765eb7be87",
+      "masterFile": "Nightfall Sound-design Sample Sheet, Not Music. A 16-second Loop With 8 Separ....wav",
+      "masterSha256": "2813b9bc3c3d9132e75fa14ed83294a5ad45602d79dd7eac1f12539edb7a6e2a",
+      "transform": "highpass=f=90,lowpass=f=5000",
+      "sourceType": "edited variant from generated sound-design palette"
+    },
+    {
+      "file": "sfx/hurt.ogg",
+      "sha256": "fd81c5a48e7cd9d6a8025343e2c259b6e9e20b5063b0baf3bbdc40ceaf202613",
+      "bytes": 7265,
+      "sourceSeconds": [
+        2.4,
+        3.2
+      ],
+      "id": "hurt",
+      "sunoUrl": "https://suno.com/song/95dc9003-08e9-40ab-a66f-03765eb7be87",
+      "masterFile": "Nightfall Sound-design Sample Sheet, Not Music. A 16-second Loop With 8 Separ....wav",
+      "masterSha256": "2813b9bc3c3d9132e75fa14ed83294a5ad45602d79dd7eac1f12539edb7a6e2a",
+      "transform": "asetrate=40800,lowpass=f=3500",
+      "sourceType": "edited variant from generated sound-design palette"
+    },
+    {
+      "file": "sfx/enemy_beast.ogg",
+      "sha256": "4e27ba722ab0aacbb758dc0e04014717cc997bd5c7059a28201b9a41c78696f9",
+      "bytes": 6995,
+      "sourceSeconds": [
+        2.92,
+        3.7
+      ],
+      "id": "enemy_beast",
+      "sunoUrl": "https://suno.com/song/95dc9003-08e9-40ab-a66f-03765eb7be87",
+      "masterFile": "Nightfall Sound-design Sample Sheet, Not Music. A 16-second Loop With 8 Separ....wav",
+      "masterSha256": "2813b9bc3c3d9132e75fa14ed83294a5ad45602d79dd7eac1f12539edb7a6e2a",
+      "transform": "asetrate=33600,lowpass=f=2200",
+      "sourceType": "edited variant from generated sound-design palette"
+    },
+    {
+      "file": "sfx/enemy_bone.ogg",
+      "sha256": "56dc0d7f1ae1a4b2b40fd2a3c1986389fee65659b37afcf0146f78fe1f9b03c8",
+      "bytes": 8132,
+      "sourceSeconds": [
+        3.65,
+        4.22
+      ],
+      "id": "enemy_bone",
+      "sunoUrl": "https://suno.com/song/95dc9003-08e9-40ab-a66f-03765eb7be87",
+      "masterFile": "Nightfall Sound-design Sample Sheet, Not Music. A 16-second Loop With 8 Separ....wav",
+      "masterSha256": "2813b9bc3c3d9132e75fa14ed83294a5ad45602d79dd7eac1f12539edb7a6e2a",
+      "transform": "asetrate=60000,highpass=f=1100",
+      "sourceType": "edited variant from generated sound-design palette"
+    },
+    {
+      "file": "sfx/enemy_ghost.ogg",
+      "sha256": "895b26fa299466017efa66e8476759660451cf5f91dd665fad72228dbcd605f2",
+      "bytes": 7834,
+      "sourceSeconds": [
+        4.15,
+        4.72
+      ],
+      "id": "enemy_ghost",
+      "sunoUrl": "https://suno.com/song/95dc9003-08e9-40ab-a66f-03765eb7be87",
+      "masterFile": "Nightfall Sound-design Sample Sheet, Not Music. A 16-second Loop With 8 Separ....wav",
+      "masterSha256": "2813b9bc3c3d9132e75fa14ed83294a5ad45602d79dd7eac1f12539edb7a6e2a",
+      "transform": "areverse,highpass=f=500,lowpass=f=7000",
+      "sourceType": "edited variant from generated sound-design palette"
+    }
+  ]
+}

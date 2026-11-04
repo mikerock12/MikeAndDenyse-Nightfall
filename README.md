@@ -1,5 +1,11 @@
 # Mike & Denyse: Nightfall
 
+## Nightfall1.2.0 — candidato com audio Suno
+
+Inclui16 musicas de cenario em loop, falas PT-BR de Mike/Denyse e17 chefes (51 cortes), e8 variantes de efeitos de combate editadas a partir de uma paleta Suno. Musica e vozes tem volumes separados; dialogos reduzem a musica e a pausa/background suspende a reproducao. Arte, regras e LAN continuam preservados. O candidato esta em validacao, sem substituir a release1.1.1 antes de CI e publicacao.
+
+Procedencia e hashes em NightfallNative/Content/audio/provenance.json. Matrizes originais em NightfallNative/AudioMasters/Suno-20261104 ficam fora dos pacotes publicos e entram no backup privado. Responsavel: Codex.
+
 ## Port nativo C++ — 1.1.1 (03/11/2026)
 
 `NightfallNative/` preserva o projeto Unity abaixo e usa o mesmo frontend C++20/raylib em Windows e Android. O executável Windows usa subsistema GUI e abre sem prompt. Configurações de tela, qualidade, áudio e controles ficam salvas no dispositivo; Windows oferece modos de janela, resolução, VSync, FPS e renderização interna até 4K. A simulação mantém 60 Hz, independentemente do limite de renderização.

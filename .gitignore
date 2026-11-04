@@ -89,3 +89,4 @@ nightfall_progress.cfg
 *.exe
 *.zip
 __pycache__/
+NightfallNative/AudioMasters/

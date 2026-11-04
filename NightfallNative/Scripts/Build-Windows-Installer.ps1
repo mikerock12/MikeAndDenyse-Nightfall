@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.1.1"
+    [string]$Version = "1.2.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -40,6 +40,10 @@ Get-ChildItem -Path $ArtSrc -Recurse -Filter "*.png" | ForEach-Object {
     if (-not (Test-Path $targetParent)) { New-Item -ItemType Directory -Force -Path $targetParent | Out-Null }
     Copy-Item $_.FullName $targetPath -Force
 }
+
+$AudioSrc = Join-Path $NativeRoot 'Content/audio'
+if (-not (Test-Path (Join-Path $AudioSrc 'bank.txt'))) { throw 'Nightfall audio bank missing' }
+Copy-Item -LiteralPath $AudioSrc -Destination (Join-Path $StageDir 'Content/audio') -Recurse -Force
 
 $ZipPath = Join-Path $OutDir "MikeAndDenyse-$Version-Windows-x64.zip"
 if (Test-Path $ZipPath) { Remove-Item $ZipPath -Force }

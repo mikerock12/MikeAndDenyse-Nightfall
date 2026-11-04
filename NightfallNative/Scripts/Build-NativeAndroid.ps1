@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.1.1",
+    [string]$Version = "1.2.0",
     [ValidateSet('arm64-v8a','x86_64')][string]$Abi = 'arm64-v8a',
     [string]$RaylibSource = $env:RAYLIB_SOURCE_DIR,
     [switch]$UnsignedOnly,
@@ -51,6 +51,16 @@ Get-ChildItem -LiteralPath $ArtSrc -Recurse -Filter '*.png' | Sort-Object FullNa
     $index += $rel
 }
 [IO.File]::WriteAllLines((Join-Path $ArtDst 'index.txt'), $index, [Text.UTF8Encoding]::new($false))
+$AudioSrc = Join-Path $NativeRoot 'Content/audio'
+if (-not (Test-Path (Join-Path $AudioSrc 'bank.txt'))) { throw 'Nightfall audio bank missing' }
+$AudioDst = Join-Path $Assets 'audio'
+New-Item -ItemType Directory -Force -Path $AudioDst | Out-Null
+Get-ChildItem -LiteralPath $AudioSrc -Recurse -File | ForEach-Object {
+    $relative = $_.FullName.Substring($AudioSrc.Length).TrimStart('\','/')
+    $destination = Join-Path $AudioDst $relative
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destination) | Out-Null
+    Copy-Item -LiteralPath $_.FullName -Destination $destination -Force
+}
 $Platform = Join-Path $NativeRoot 'Platform/Android'
 $manifest = [xml](Get-Content -LiteralPath (Join-Path $Platform 'AndroidManifest.xml') -Raw)
 $null = $manifest.manifest.SetAttribute('versionName','http://schemas.android.com/apk/res/android',$Version)

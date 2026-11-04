@@ -3,6 +3,7 @@
 #include "NativeWorldArt.h"
 #include "raylib.h"
 #include "GamePreferences.h"
+#include "NativeAudio.h"
 #include "MobileServices.h"
 #if defined(PLATFORM_ANDROID)
 extern "C" JNIEXPORT void JNICALL Java_com_mikeanddenyse_nightfall_MainActivity_nativeSetPaused(JNIEnv*,jclass,jboolean paused){SLTMobile::SetBackground(paused);}
@@ -103,6 +104,20 @@ namespace
             _sounds["boss"] = Mix(ToneSamples(0.85f,90,62,WaveKind::Saw,0.22f,3),NoiseSamples(0.5f,0.10f,0.12f));
             _sounds["clear"] = BuildArp({523.0f, 659.0f, 784.0f, 1046.0f}, 0.12f, 0.16f, WaveKind::Square);
             _sounds["ui"] = BuildTone(0.06f, 620.0f, 900.0f, WaveKind::Square, 0.10f, 0.0f);
+        }
+
+        void Overrides(const std::unordered_map<std::string,std::string>& files)
+        {
+            if(!_ready)return;
+            int loaded=0;
+            for(const auto& entry:files){
+                int size=0;auto bytes=LoadFileData(entry.second.c_str(),&size);if(!bytes)continue;
+                Wave wave=LoadWaveFromMemory(".ogg",bytes,size);UnloadFileData(bytes);if(!IsWaveValid(wave))continue;
+                Sound sound=LoadSoundFromWave(wave);UnloadWave(wave);if(!IsSoundValid(sound))continue;
+                auto old=_sounds.find(entry.first);if(old!=_sounds.end())UnloadSound(old->second);
+                _sounds[entry.first]=sound;++loaded;
+            }
+            TraceLog(LOG_INFO,"NIGHTFALL_CUSTOM_SFX: %d",loaded);
         }
 
         void Play(const std::string& id)
@@ -355,8 +370,10 @@ int main(int argc, char** argv)
 {
     std::string renderSmokeDirectory;
     std::string settingsSmokeDirectory;
+    bool audioSmoke=false;
     for (int i = 1; i < argc; ++i)
     {
+        if(std::string(argv[i])=="--audio-smoke")audioSmoke=true;
         if(std::string(argv[i])=="--settings-smoke" && i+1<argc)settingsSmokeDirectory=argv[++i];
         if(std::string(argv[i])=="--render-smoke" && i+1<argc) renderSmokeDirectory=argv[++i];
         if (std::string(argv[i]) == "--headless-smoke")
@@ -383,7 +400,7 @@ int main(int argc, char** argv)
         }
     }
 
-    SetConfigFlags(renderSmokeDirectory.empty() && settingsSmokeDirectory.empty() ? FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT : FLAG_WINDOW_HIDDEN);
+    SetConfigFlags(renderSmokeDirectory.empty() && settingsSmokeDirectory.empty() && !audioSmoke ? FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT : FLAG_WINDOW_HIDDEN);
 #ifdef PLATFORM_ANDROID
     // Use the actual Android surface size. raylib 5.5's fixed logical window
     // path applies its own framebuffer scale in addition to our 16:9 target.
@@ -429,7 +446,6 @@ int main(int argc, char** argv)
 #endif
     Progress::Load();
     NativeSfxBank sfx;
-    if(renderSmokeDirectory.empty()) sfx.Init();
     NativeWorldArt worldArt;
     NativeSpriteBank sprites;
 #ifdef PLATFORM_ANDROID
@@ -437,6 +453,12 @@ int main(int argc, char** argv)
     SetLoadFileDataCallback(LoadAndroidAsset);
     SetLoadFileTextCallback(LoadAndroidAssetText);
 #endif
+    if(renderSmokeDirectory.empty())sfx.Init();
+    NativeAudio audio;
+    if(renderSmokeDirectory.empty())audio.Init();
+    sfx.Overrides(audio.Effects());
+    settings.musicAvailable=audio.HasMusic();settings.voicesAvailable=audio.HasVoices();
+    if(audioSmoke){SetMasterVolume(0);bool ok=audio.Validate();for(const auto& boss:Catalog::Bosses()){ok=audio.Dialogue(boss.Id,"mike",true)&&ok;audio.ClearDialogue();}audio.Shutdown();sfx.Shutdown();CloseWindow();return ok?0:10;}
     sprites.LoadAll();
     if(!renderSmokeDirectory.empty() && sprites.AssetCount()!=77) {
         TraceLog(LOG_ERROR,"Render smoke requires all 77 original assets"); CloseWindow(); return 3;
@@ -535,6 +557,9 @@ int main(int argc, char** argv)
     ScreenMode loggedScreen=ScreenMode::Title;
     double simulationAccumulator=0;
     bool loggedPause=false;
+    bool audioWasPlaying=false,audioArena=false,audioBelial=false;
+    int audioWorld=-1;
+    float audioSimTime=-1;
     TraceLog(LOG_INFO,"NIGHTFALL_SCREEN: 0");
 
     while (!quit && !WindowShouldClose())
@@ -695,9 +720,32 @@ int main(int argc, char** argv)
         }
         if(screen!=loggedScreen) { TraceLog(LOG_INFO,"NIGHTFALL_SCREEN: %d",static_cast<int>(screen));loggedScreen=screen; }
         if(paused!=loggedPause) { TraceLog(LOG_INFO,"NIGHTFALL_PAUSE: %d",paused?1:0);loggedPause=paused; }
+        if(IsAudioDeviceReady()){
+            bool playing=screen==ScreenMode::Playing&&sim.HasLevel;
+            bool restarted=playing&&(!audioWasPlaying||audioWorld!=sim.WorldIndex||sim.Time+.01f<audioSimTime);
+            if(restarted||(!playing&&audioWasPlaying)){audio.ClearDialogue();audioArena=audioBelial=false;}
+            audio.MusicFor(playing?sim.Level.World.Id:"forest");
+            if(playing&&!paused){
+                bool arena=sim.LockedArena,belial=sim.BelialPhase;
+                for(const auto& boss:sim.Bosses)if(!boss.Dead){arena=true;if(boss.Def.Id=="belial")belial=true;}
+                if(arena&&!audioArena)audio.Dialogue(belial?"belial":sim.Level.World.Boss,heroP1,sim.Players.size()>1);
+                else if(belial&&!audioBelial)audio.Dialogue("belial",heroP1,sim.Players.size()>1);
+                audioArena=arena;audioBelial=belial;
+            }
+            if(playing&&sim.State=="dead")audio.ClearDialogue();
+            audio.Update(SLTMobile::Background||(playing&&(paused||settings.open)),settings.value.music,settings.value.voice);
+            audioWasPlaying=playing;audioWorld=sim.WorldIndex;audioSimTime=sim.Time;
+        }
         for (auto& fx : visualFx) fx.age += dt;
         visualFx.erase(std::remove_if(visualFx.begin(),visualFx.end(),[](const VisualFx& fx){return fx.age>0.4f;}),visualFx.end());
         for(const auto& event:sim.Fx) {
+            if(event.Kind==static_cast<uint8_t>(FxKind::Cast)){
+                bool playerCast=false;for(const auto& player:sim.Players)if(std::abs(event.X-player.X-player.W/2)<55&&std::abs(event.Y-player.Y-18)<45)playerCast=true;
+                if(!playerCast)sfx.Play("enemy_ghost");
+            }
+            if(event.Kind==static_cast<uint8_t>(FxKind::Death)){
+                for(const auto& enemy:sim.Enemies)if(enemy.Dead&&std::abs(event.X-enemy.X-enemy.W/2)<20&&std::abs(event.Y-enemy.Y-enemy.H/2)<30){sfx.Play(sim.WorldIndex==4||sim.WorldIndex==9?"enemy_bone":"enemy_beast");break;}
+            }
             if(visualFx.size()<160) visualFx.push_back({event,0});
             if(lan.IsHosting() && pendingNetworkFx.size()<FrameSnap::MaxFx)
                 pendingNetworkFx.push_back({event.X,event.Y,event.Kind,static_cast<uint8_t>(event.Dir<0 ? 0:1)});
@@ -1018,6 +1066,7 @@ int main(int argc, char** argv)
     UnloadRenderTexture(target);
     worldArt.Unload();
     sprites.UnloadAll();
+    audio.Shutdown();
     sfx.Shutdown();
     CloseWindow();
     return 0;
