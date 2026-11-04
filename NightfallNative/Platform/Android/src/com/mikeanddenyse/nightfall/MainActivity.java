@@ -10,6 +10,7 @@ import android.util.Log;
 import java.io.IOException;
 /** The complete C++ frontend owns rendering, input and audio. */
 public class MainActivity extends NativeActivity {
+    static { System.loadLibrary("nightfall"); }
     private WifiManager.MulticastLock discoveryLock;
     private static native void nativeSetPaused(boolean paused);
 

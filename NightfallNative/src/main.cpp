@@ -469,6 +469,20 @@ int main(int argc, char** argv)
 
     Ctl touchCtl{};
 
+    auto readPad=[&](Ctl c,int pad){
+        if (IsGamepadAvailable(pad))
+        {
+            float gy = GetGamepadAxisMovement(pad, GAMEPAD_AXIS_LEFT_Y);
+            float gx = GetGamepadAxisMovement(pad, GAMEPAD_AXIS_LEFT_X);
+            c.L = c.L || gx < -settings.value.deadzone || IsGamepadButtonDown(pad, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+            c.R = c.R || gx > settings.value.deadzone || IsGamepadButtonDown(pad, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+            c.D = c.D || gy > settings.value.deadzone || IsGamepadButtonDown(pad, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
+            c.Jp = c.Jp || IsGamepadButtonPressed(pad, settings.value.buttons[8]);
+            c.Jn = c.Jn || IsGamepadButtonDown(pad, settings.value.buttons[8]);
+            c.Ap = c.Ap || IsGamepadButtonPressed(pad, settings.value.buttons[9]);
+        }
+        return c;
+    };
     sim.ReadCtl = [&](int slot) -> Ctl {
         if (slot == 0)
         {
@@ -479,17 +493,7 @@ int main(int argc, char** argv)
             c.Jp = c.Jp || settings.Pressed(0,3);
             c.Jn = c.Jn || settings.Down(0,3);
             c.Ap = c.Ap || settings.Pressed(0,4);
-            if (IsGamepadAvailable(0))
-            {
-                float gx = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X);
-                c.L = c.L || gx < -settings.value.deadzone || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
-                c.R = c.R || gx > settings.value.deadzone || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
-                c.D = c.D || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
-                c.Jp = c.Jp || IsGamepadButtonPressed(0, settings.value.buttons[8]);
-                c.Jn = c.Jn || IsGamepadButtonDown(0, settings.value.buttons[8]);
-                c.Ap = c.Ap || IsGamepadButtonPressed(0, settings.value.buttons[9]);
-            }
-            return c;
+            return readPad(c,0);
         }
         if (lan.IsHosting())
         {
@@ -511,7 +515,7 @@ int main(int argc, char** argv)
         c.Jp = settings.Pressed(1,3);
         c.Jn = settings.Down(1,3);
         c.Ap = settings.Pressed(1,4);
-        return c;
+        return readPad(c,1);
     };
 
     RenderTexture2D target = LoadRenderTexture(T::ViewW*settings.RenderScale(), T::ViewH*settings.RenderScale());

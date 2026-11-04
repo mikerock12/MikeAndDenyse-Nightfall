@@ -293,3 +293,7 @@ QA Android também executa o mesmo APK em superfícies 16:9 (960×540) e 5:3 (10
 ## Validação final da entrega 1.0.1 — 03/11/2026
 
 CI 41588036821 aprovado (Windows/100.800 comparações/Android e dois percursos emulados 16:9 e 5:3). Windows instalado e desinstalado isoladamente, 80 hashes e render dos 16 mundos aprovados; APK ARM64 assinado com identidade preservada. Detalhes e hashes em NightfallNative/docs/FIDELITY_REPAIR.md. Publicação e backup têm registro final nos contextos do portal pelo coordenador. Limites físicos descritos em AGENTS.md. Responsável: Codex / agente Nightfall.
+
+
+### Configuracoes e icones APK — 03/11/2026, em validacao
+Configuracoes de plataforma e touch persistentes, icones Android da arte Windows aprovada, pausa de audio no background e executavel Windows GUI implementados. Simulacao de frontend desacoplada do FPS; P2 aceita segundo gamepad. QA passou a conferir 15 recursos PNG compilados por jogo, dois XML adaptativos, preferencias apos reinicio e gestos reais no emulador. Primeiro CI encontrou falta de carregamento explicito da biblioteca para o JNI de lifecycle no Nightfall e seletor de borda obsoleto no driver RDA; corrigidos, gates serao repetidos. Nao ha nova release ainda. Audio Suno adiado para o fim pelo usuario, sem clips gerados; nao expor ajustes sem audio correspondente. Sem Android fisico/dupla Wi-Fi. Responsavel: Codex.

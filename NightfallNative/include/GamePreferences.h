@@ -29,7 +29,8 @@ public:
     Values value;
     bool open=false, changed=false, windowChanged=false;
     std::string status;
-    Preferences(std::filesystem::path file, bool fighter):path(std::move(file)),fighting(fighter) { Defaults(); Load(); TraceLog(LOG_INFO,"SLT_PREFS_LOADED: mobile=%d master=%.2f left=%d size=%.2f deadzone=%.3f",Mobile,value.master,value.leftHanded,value.touchSize,value.deadzone); }
+    bool musicAvailable=true,voicesAvailable=true;
+    Preferences(std::filesystem::path file, bool fighter):path(std::move(file)),fighting(fighter) { musicAvailable=voicesAvailable=fighter; Defaults(); Load(); TraceLog(LOG_INFO,"SLT_PREFS_LOADED: mobile=%d master=%.2f left=%d size=%.2f deadzone=%.3f",Mobile,value.master,value.leftHanded,value.touchSize,value.deadzone); }
     int RenderScale() const { return Mobile ? (value.quality==2?2:1) : (value.quality==3&&fighting?6:value.quality+1); }
     int Key(int player,int action) const { return value.keys[player*10+action]; }
     bool Down(int player,int action) const { return IsKeyDown(Key(player,action)); }
@@ -48,7 +49,7 @@ public:
         point.y+=value.touchInset*height*.35f;
         return point;
     }
-    void Show(int category=0) { open=true;tab=std::clamp(category,0,4); selected=0;scroll=0; capture=-1; changed=false; TraceLog(LOG_INFO,"SLT_SETTINGS: opened mobile=%d",Mobile); }
+    void Show(int category=0) { open=true;tab=std::clamp(category,0,4); selected=0;scroll=0; capture=-1; page=0; previousDown=GetTouchPointCount()>0||IsMouseButtonDown(MOUSE_LEFT_BUTTON); changed=false; TraceLog(LOG_INFO,"SLT_SETTINGS: opened mobile=%d",Mobile); }
     void Close() { open=false; capture=-1; Save(); TraceLog(LOG_INFO,"SLT_SETTINGS: saved quality=%d fps=%d",value.quality,value.fps); }
     void Defaults() {
         value=Values{};
@@ -93,6 +94,7 @@ public:
             if(IsWindowState(FLAG_BORDERLESS_WINDOWED_MODE))ToggleBorderlessWindowed();
             int monitor=GetCurrentMonitor();const int widths[]={1280,1600,1920,2560};
             int width=std::min(widths[value.resolution],std::max(640,GetMonitorWidth(monitor)-80));
+            width=std::min(width,std::max(640,(GetMonitorHeight(monitor)-80)*16/9));
             SetWindowSize(width,width*9/16);
             Vector2 origin=GetMonitorPosition(monitor);SetWindowPosition(static_cast<int>(origin.x+(GetMonitorWidth(monitor)-width)/2),static_cast<int>(origin.y+(GetMonitorHeight(monitor)-width*9/16)/2));
             if(value.windowMode==1)ToggleBorderlessWindowed();
@@ -153,7 +155,7 @@ public:
         Box({26,Mobile?475.f:489.f,200,Mobile?54.f:34.f},"Restaurar padroes");
         if(Mobile&&rows.size()>4)Box({720,475,212,54},"Mais opcoes >");
         const char* hint=Mobile?"Toque em uma opcao ou nos botoes - / +. As preferencias ficam salvas.":"Setas: ajustar  |  Tab: categoria  |  Esc: salvar e voltar  |  Controle: direcional / A / B";
-        DrawText(status.empty()?hint:status.c_str(),240,Mobile?493:501,Mobile?10:12,LIGHTGRAY);
+        if(!Mobile||!status.empty())DrawText(status.empty()?hint:status.c_str(),240,Mobile?493:501,Mobile?10:12,LIGHTGRAY);
         if(capture>=0){DrawRectangle(110,211,740,125,Color{8,12,22,250});DrawRectangleLines(110,211,740,125,GOLD);DrawText(capturePad?"Pressione o botao do controle":"Pressione a nova tecla",170,238,28,GOLD);DrawText("Esc ou Voltar cancela. Teclas repetidas sao trocadas.",170,290,17,WHITE);}
         EndMode2D();
     }
@@ -167,7 +169,7 @@ private:
     std::vector<std::pair<std::string,std::string>> Rows() const {
         if(tab==0){if(Mobile)return {{"Orientacao","Paisagem"},{"Limite de quadros",std::to_string(value.fps)+" FPS"},{"Escala inteira de pixels",On(value.integerScale)},{"Pausar ao sair do app","Sempre"},{"Mostrar FPS",On(value.showFps)}};const char* modes[]={"Janela","Sem bordas","Tela cheia"};const char* sizes[]={"1280 x 720","1600 x 900","1920 x 1080","2560 x 1440"};return {{"Modo de tela",modes[value.windowMode]},{"Resolucao de janela",sizes[value.resolution]},{"Sincronizacao vertical",On(value.vsync)},{"Limite de quadros",std::to_string(value.fps)+" FPS"},{"Escala inteira de pixels",On(value.integerScale)},{"Pausa ao perder foco",On(value.autoPause)},{"Mostrar FPS",On(value.showFps)}};}
         if(tab==1){const char* pc[]={"Baixa","Equilibrada","Alta","Ultra / 4K"};const char* phone[]={"Economia","Equilibrada","Alta"};return {{"Qualidade",Mobile?phone[value.quality]:pc[value.quality]},{"Resolucao interna",std::to_string(RenderScale())+"x"},{"Efeitos de ambiente",On(value.particles)},{"Tremor de camera",On(value.shake)},{"Brilho",Percent(value.brightness)}};}
-        if(tab==2)return {{"Volume geral",Percent(value.master)},{"Musica e ambiente",Percent(value.music)},{"Efeitos de combate",Percent(value.effects)},{"Vozes",Percent(value.voice)}};
+        if(tab==2){std::vector<std::pair<std::string,std::string>> rows={{"Volume geral",Percent(value.master)}};if(musicAvailable)rows.push_back({"Musica e ambiente",Percent(value.music)});rows.push_back({"Efeitos de combate",Percent(value.effects)});if(voicesAvailable)rows.push_back({"Vozes",Percent(value.voice)});return rows;}
         if(tab==4)return {{"Controles na tela",Mobile?"Sempre visiveis":On(value.touch)},{"Modo canhoto",On(value.leftHanded)},{"Tamanho dos botoes",Percent(value.touchSize)},{"Opacidade",Percent(value.touchOpacity)},{"Margem lateral",Percent(value.touchInset)},{"Vibracao",Mobile?On(value.vibration):"So no Android"}};
         std::vector<std::pair<std::string,std::string>> rows={{"Jogador",player?"P2":"P1"},{"Zona morta do analogico",Percent(value.deadzone)},{Mobile?"Pagina do controle":"Pagina",fighting?(Mobile?(page?"2 / 2":"1 / 2"):(page<2?"Teclado "+std::to_string(page+1):"Controle "+std::to_string(page-1))):(Mobile?"Controle externo":(page?"Controle":"Teclado"))}};
         const char* fight[]={"Esquerda","Direita","Cima / pulo","Baixo","Golpe leve","Golpe forte","Especial","Defesa","Agarrar","Super"};
@@ -189,7 +191,7 @@ private:
         auto cap=[&](){const int pc[]={30,60,90,120,144,165,240};const int phone[]={30,60,90,120};const int* p=Mobile?phone:pc;int n=Mobile?4:7,index=0;while(index<n-1&&p[index]!=value.fps)index++;index=(index+dir+n)%n;value.fps=p[index];};
         if(tab==0){if(Mobile){if(row==1)cap();if(row==2)value.integerScale=!value.integerScale;if(row==4)value.showFps=!value.showFps;}else{switch(row){case 0:cycle(value.windowMode,3);break;case 1:cycle(value.resolution,4);break;case 2:value.vsync=!value.vsync;break;case 3:cap();break;case 4:value.integerScale=!value.integerScale;break;case 5:value.autoPause=!value.autoPause;break;case 6:value.showFps=!value.showFps;break;}}}
         if(tab==1){switch(row){case 0:cycle(value.quality,Mobile?3:4);value.particles=value.quality>0;break;case 1:cycle(value.quality,Mobile?3:4);break;case 2:value.particles=!value.particles;break;case 3:value.shake=!value.shake;break;case 4:bump(value.brightness,.05f,.65f,1.3f);break;}}
-        if(tab==2){float* vols[]={&value.master,&value.music,&value.effects,&value.voice};bump(*vols[row],.05f);}
+        if(tab==2){std::vector<float*> vols={&value.master};if(musicAvailable)vols.push_back(&value.music);vols.push_back(&value.effects);if(voicesAvailable)vols.push_back(&value.voice);bump(*vols[row],.05f);}
         if(tab==3){if(row==0)player=1-player;else if(row==1)bump(value.deadzone,.025f,.05f,.6f);else if(row==2){page=(page+1)%(fighting?(Mobile?2:4):(Mobile?1:2));}else{capturePad=Mobile||(!fighting&&page)||(fighting&&page>=2);capture=(capturePad?(fighting?(Mobile?page:page-2)*3:8):(fighting?page*5:0))+row-3;status="Aguardando comando";}}
         if(tab==4){switch(row){case 0:if(!Mobile)value.touch=!value.touch;break;case 1:value.leftHanded=!value.leftHanded;break;case 2:bump(value.touchSize,.05f,.75f,1.35f);break;case 3:bump(value.touchOpacity,.05f,.15f,.95f);break;case 4:bump(value.touchInset,.005f,0,.065f);break;case 5:value.vibration=!value.vibration;break;}}
     }

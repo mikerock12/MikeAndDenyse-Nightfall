@@ -14,10 +14,12 @@ import sys
 import time
 import xml.etree.ElementTree as ET
 import zipfile
+from android_icons import verify as verify_icons
 
 apk = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
 output.mkdir(parents=True, exist_ok=True)
+verify_icons(apk,Path(__file__).resolve().parents[1]/'Platform/Android',output)
 package = 'com.mikeanddenyse.nightfall.qa'
 activity = 'com.mikeanddenyse.nightfall.MainActivity'
 
