@@ -139,6 +139,7 @@ def tap(x, y):
     time.sleep(1)
 capture('01-title',0)
 audio_log=adb('logcat','-d','-s','raylib').decode('utf-8',errors='replace')
+assert f'SLT_PHYSICAL_RENDER_SIZE: {width} x {height}' in audio_log, 'Framebuffer dimensions differ from the presented surface'
 for evidence in ['NIGHTFALL_AUDIO_BANK: music=16 voice=51','NIGHTFALL_CUSTOM_SFX: 8','NIGHTFALL_MUSIC: forest seconds=']:
     assert evidence in audio_log, 'Actual Android audio initialization missing: '+evidence
 tap(810,502)

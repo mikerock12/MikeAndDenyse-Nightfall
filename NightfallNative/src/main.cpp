@@ -573,7 +573,7 @@ int main(int argc, char** argv)
             if(settings.windowChanged)settings.ApplyWindow(!renderSmokeDirectory.empty()||!settingsSmokeDirectory.empty());
             if(target.texture.width!=T::ViewW*settings.RenderScale()){UnloadRenderTexture(target);target=LoadRenderTexture(T::ViewW*settings.RenderScale(),T::ViewH*settings.RenderScale());SetTextureFilter(target.texture,TEXTURE_FILTER_POINT);}
         }
-        if(IsAudioDeviceReady())SetMasterVolume(SLTMobile::Background?0:settings.value.master);
+        if(IsAudioDeviceReady())SetMasterVolume(SLTMobile::Background||!settingsSmokeDirectory.empty()?0:settings.value.master);
         showTouchHud=settings.value.touch;
         if(settings.open&&screen==ScreenMode::Playing)paused=true;
         int tc = GetTouchPointCount();
@@ -774,7 +774,7 @@ int main(int argc, char** argv)
             DrawText("NIGHTFALL", 335, 185, 48, Color{200, 70, 90, 255});
             DrawText("16 noites - 32 monstros - 16 chefes - Belial", 245, 260, 20, LIGHTGRAY);
             Button({300,300,360,52},"Um jogador");
-            Button({300,362,360,52},"Dois celulares - Wi-Fi LAN");
+            Button({300,362,360,52},"Coop na rede local");
             Button({300,424,170,48},"Controles"); Button({490,424,170,48},"Sair");
         }
         else if (screen == ScreenMode::HeroSelect)
