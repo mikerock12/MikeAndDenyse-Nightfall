@@ -32,8 +32,8 @@ try {
     $Receipt['matchingPortableFiles']=$CheckedFiles
     $InstalledExe=Join-Path $Target 'NightfallNative.exe'
     $Receipt['installedExeSHA256']=(Get-FileHash -LiteralPath $InstalledExe -Algorithm SHA256).Hash.ToLower()
-    & $InstalledExe --headless-smoke
-    $Receipt['headlessSmokePassed']=$LASTEXITCODE -eq 0
+    $Smoke=Start-Process -FilePath $InstalledExe -ArgumentList '--headless-smoke' -PassThru -Wait -WindowStyle Hidden
+    $Receipt['headlessSmokePassed']=$Smoke.ExitCode -eq 0
     if(-not $Receipt['headlessSmokePassed']) { throw 'Installed executable headless smoke failed' }
     $Info=[Diagnostics.ProcessStartInfo]::new()
     $Info.FileName=$InstalledExe

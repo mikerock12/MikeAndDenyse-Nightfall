@@ -1,4 +1,11 @@
 # Contexto Operacional — Mike & Denyse: Nightfall (`contexto.md`)
+## Plataforma e icones Android — 03/11/2026
+
+Nightfall1.1.0 implementa configuracoes persistentes, icones APK tradicionais/adaptativos derivados dos dois personagens aprovados e executavel Windows GUI sem prompt. Render4K, janela/sem bordas/fullscreen, VSync/FPS, brilho, teclado P1/P2, dois gamepads e deadzone; Androidtouch ajustavel/canhoto/opacidade/margem e vibracao. Simulacao frontend fixa60Hz; Core/Unity preservados. Musica/voz aparecem quando houver conteudo; efeitos/volume geral ja efetivos. CTest3/3, gate PE GUI e CI41756274066 aprovados nos tresjobs. Androidemulado2proporcoes/34capturas com settings5categorias, preferencias apos reiniciar,2herois e pausa/ciclo de vida. Windows portatil16mundos+5settings reais; icones PE dos quatroEXEs/PNG interno e15PNG compilados por APK conferidos. APK ARM64 v2/v3 com certificado anterior e alinhamento16KiB. Instalacao Nightfallexistente preservada; reinstalacao nao repetida. Suno por ultimo conforme usuario, verificacao do site ainda impede gerar audio; nenhum clipnovo. Release/merge/portal/backup coordenados no portal.
+
+Sem homologacao Android fisica, audio ouvido, desempenho/toque fisicos ou dupla Wi-Fi. Responsavel: Codex.
+
+
 
 Em 03/11/2026, o CI 41589263103 expôs um gesto adb sem duração perdido no menu em GPU de software. O driver passa a injetar toque imóvel de 120 ms e aguardar a tela esperada por até 12 s, sem reenviar ações nem afrouxar a igualdade de estado. Aplicação e candidatos permanecem inalterados; repete-se o CI para esse ajuste de QA. Responsável: Codex.
 
@@ -88,3 +95,14 @@ QA Android também executa o mesmo APK em superfícies 16:9 (960×540) e 5:3 (10
 Preparada versão 1.0.2. Mike e Denyse lado a lado com espada e cajado; composição transparente derivada dos personagens originais, prompt e procedência registrados. ICO com dez tamanhos (16–256 px) incorporado ao jogo e instalador; PNG incorporado ao PE para SetWindowIcon, atalhos e desinstalação apontam ao EXE. CMake/MSVC e Inno Setup compilam os recursos; o script direto do Rua de Aço também. Verificação PE dos quatro executáveis comparou todas as imagens ao ICO aprovado; as duas janelas reais devolveram ícone 256×256 e logs de aplicação. Instalador RDA: 342 arquivos iguais ao ZIP, headless, 29 capturas e desinstalação aprovados. Nightfall: instalador compilado e ícone extraído; execução portátil com ícone conferida. Instalação Nightfall 1.0.1 já existe em Program Files e foi preservada, impedindo repetir o teste de instalação neste host.
 
 APKs recebem apenas versão de manutenção, com a mesma assinatura v2/v3 anterior e alinhamento 16 KiB; gameplay permanece o da correção anterior. PR/CI, releases, portal e backup desta etapa serão consolidados pelo coordenador no contexto do portal. Testes físicos Android continuam pendentes. Responsável: Codex.
+
+
+## Atualizacao de plataforma 1.1.0 — em validacao, 03/11/2026
+
+Configuracoes persistentes de tela, qualidade, audio, teclado/controle e touch integradas ao frontend compartilhado. Android tem HUD sempre visivel, tamanho/opacidade/margem/canhoto e vibracao; icones tradicionais e adaptativos derivam da mesma arte Windows aprovada, com procedencia em Platform/Android/Branding (NightfallNative no Nightfall). Windows oferece resolucao, modos de janela, VSync, limites FPS e render interno ate 4K. Nightfall usa subsistema GUI e simulacao fixa 60Hz. Rua de Aco abre o cliente Web oficial integrado para compatibilidade de salas; combate offline continua C++.
+
+Candidatos locais compilaram para Windows e Android x86_64; CTest anterior 4/4 RDA e 3/3 Nightfall. QA ampliado exige configuracoes por toque e persistencia apos reiniciar; CI, online real, empacotamento final, novas capturas, releases, portal e backups ainda pendentes. Suno fica por ultimo por instrucao do usuario, indisponivel por verificacao do site; nenhum audio novo gerado. Sem homologacao Android fisica. Responsavel: Codex.
+
+
+### Configuracoes e icones APK — 03/11/2026, em validacao
+Configuracoes de plataforma e touch persistentes, icones Android da arte Windows aprovada, pausa de audio no background e executavel Windows GUI implementados. Simulacao de frontend desacoplada do FPS; P2 aceita segundo gamepad. QA passou a conferir 15 recursos PNG compilados por jogo, dois XML adaptativos, preferencias apos reinicio e gestos reais no emulador. Primeiro CI encontrou falta de carregamento explicito da biblioteca para o JNI de lifecycle no Nightfall e seletor de borda obsoleto no driver RDA; corrigidos, gates serao repetidos. Nao ha nova release ainda. Audio Suno adiado para o fim pelo usuario, sem clips gerados; nao expor ajustes sem audio correspondente. Sem Android fisico/dupla Wi-Fi. Responsavel: Codex.

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(NightfallNative VERSION 1.0.2 LANGUAGES C CXX)
+project(NightfallNative VERSION 1.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -41,7 +41,7 @@ if(ANDROID)
     target_link_options(nightfall PRIVATE "-u" "ANativeActivity_onCreate" "-Wl,-z,max-page-size=16384")
 endif()
 if(WIN32 AND EXISTS "${RAYLIB_ROOT}/lib/raylibdll.lib")
-    add_executable(NightfallNative
+    add_executable(NightfallNative WIN32
         src/main.cpp
     )
     enable_language(RC)
@@ -52,6 +52,9 @@ if(WIN32 AND EXISTS "${RAYLIB_ROOT}/lib/raylibdll.lib")
     configure_file(Platform/Windows/GameResources.rc.in "${CMAKE_CURRENT_BINARY_DIR}/GameResources.rc" @ONLY)
     target_sources(NightfallNative PRIVATE Platform/Windows/WindowsBranding.cpp "${CMAKE_CURRENT_BINARY_DIR}/GameResources.rc")
     target_include_directories(NightfallNative PRIVATE Platform/Windows)
+    if(MSVC)
+        target_link_options(NightfallNative PRIVATE /ENTRY:mainCRTStartup)
+    endif()
     target_include_directories(NightfallNative PRIVATE "${RAYLIB_ROOT}/include")
     target_link_libraries(NightfallNative PRIVATE
         NightfallCore
@@ -67,6 +70,12 @@ endif()
 
 if(NOT ANDROID)
 enable_testing()
+if(WIN32)
+    add_executable(NightfallPreferencesTests tests/PreferencesTests.cpp)
+    target_include_directories(NightfallPreferencesTests PRIVATE include "${RAYLIB_ROOT}/include")
+    target_link_libraries(NightfallPreferencesTests PRIVATE "${RAYLIB_ROOT}/lib/raylibdll.lib")
+    add_test(NAME NightfallPreferencesTests COMMAND NightfallPreferencesTests)
+endif()
 add_executable(NightfallParityTrace tests/NightfallParityTrace.cpp)
 target_link_libraries(NightfallParityTrace PRIVATE NightfallCore)
 

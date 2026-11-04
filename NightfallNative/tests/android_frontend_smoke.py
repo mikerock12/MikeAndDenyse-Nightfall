@@ -14,10 +14,12 @@ import sys
 import time
 import xml.etree.ElementTree as ET
 import zipfile
+from android_icons import verify as verify_icons
 
 apk = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
 output.mkdir(parents=True, exist_ok=True)
+verify_icons(apk,Path(__file__).resolve().parents[1]/'Platform/Android',output)
 package = 'com.mikeanddenyse.nightfall.qa'
 activity = 'com.mikeanddenyse.nightfall.MainActivity'
 
@@ -125,6 +127,24 @@ def tap(x, y):
     adb('shell', 'input', 'swipe', *position, *position, '120')
     time.sleep(1)
 capture('01-title',0)
+tap(810,502)
+for tab in range(5):
+    tap(114+184*tab,108)
+    capture(f'settings-{tab}',0)
+tap(482,108); tap(684,185)
+tap(850,108); tap(882,263); tap(882,341)
+tap(666,108); tap(882,263)
+tap(852,45)
+adb('shell','am','force-stop',package)
+adb('logcat','-c')
+adb('shell','am','start','-W','-n',f'{package}/{activity}')
+time.sleep(5)
+log=adb('logcat','-d','-s','raylib').decode('utf-8',errors='replace')
+assert re.search(r'SLT_PREFS_LOADED: mobile=1 master=0.80 left=1 size=1.05 deadzone=0.245',log), 'Preferences did not survive restart'
+initial_pid=adb('shell','pidof',package).strip()
+tap(810,502); tap(850,108)
+capture('settings-restored-custom',0)
+tap(126,500); tap(852,45)
 tap(480,326)
 capture('02-hero-select',1)
 tap(305,250)

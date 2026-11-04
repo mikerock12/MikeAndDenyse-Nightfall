@@ -1,0 +1,127 @@
+{
+  "source": "Platform/Windows/Branding/AppIcon.png",
+  "sourceSha256": "f53cdf91d4050330b99c9e1b902f4ae41f0a0cdcd356f9dd683c5affb1481924",
+  "method": "Technical resize/container encoding from approved Windows artwork; no creative changes. Adaptive foreground 108dp with 60dp content; density PNGs and v26 XML.",
+  "records": [
+    {
+      "file": "res/mipmap-mdpi/ic_launcher.png",
+      "sha256": "1c5ff0e622d16d6c88a61e799d3af23af24630fd376b796b8c83a890413ff008",
+      "size": [
+        48,
+        48
+      ]
+    },
+    {
+      "file": "res/mipmap-mdpi/ic_launcher_foreground.png",
+      "sha256": "1f8ecb1815a38c6311d2251b766daddde4bcb882eaa346f0a5c7fc1f57e91868",
+      "size": [
+        108,
+        108
+      ]
+    },
+    {
+      "file": "res/mipmap-mdpi/ic_launcher_round.png",
+      "sha256": "1c5ff0e622d16d6c88a61e799d3af23af24630fd376b796b8c83a890413ff008",
+      "size": [
+        48,
+        48
+      ]
+    },
+    {
+      "file": "res/mipmap-hdpi/ic_launcher.png",
+      "sha256": "13d80da5a734a4d01ba3bba373727a18466959bfc1529a4ad2bd3e28445b73aa",
+      "size": [
+        72,
+        72
+      ]
+    },
+    {
+      "file": "res/mipmap-hdpi/ic_launcher_foreground.png",
+      "sha256": "92d961029bc3c35946a08605ccca9e6ea6195f9c308218e94f2883af9b02f9e5",
+      "size": [
+        162,
+        162
+      ]
+    },
+    {
+      "file": "res/mipmap-hdpi/ic_launcher_round.png",
+      "sha256": "13d80da5a734a4d01ba3bba373727a18466959bfc1529a4ad2bd3e28445b73aa",
+      "size": [
+        72,
+        72
+      ]
+    },
+    {
+      "file": "res/mipmap-xhdpi/ic_launcher.png",
+      "sha256": "3f6744e6734345bb39e83a61106992126c67a40e9fa9168a1350875d374763cd",
+      "size": [
+        96,
+        96
+      ]
+    },
+    {
+      "file": "res/mipmap-xhdpi/ic_launcher_foreground.png",
+      "sha256": "02d1ce646bec2bc4073694d13913007b4d5ce5e0be938f30cdc1817ea7ca311c",
+      "size": [
+        216,
+        216
+      ]
+    },
+    {
+      "file": "res/mipmap-xhdpi/ic_launcher_round.png",
+      "sha256": "3f6744e6734345bb39e83a61106992126c67a40e9fa9168a1350875d374763cd",
+      "size": [
+        96,
+        96
+      ]
+    },
+    {
+      "file": "res/mipmap-xxhdpi/ic_launcher.png",
+      "sha256": "d7ea2e90782519494697fbd910e2efa9c23cf029e0f28b1424f6abdf3709efe5",
+      "size": [
+        144,
+        144
+      ]
+    },
+    {
+      "file": "res/mipmap-xxhdpi/ic_launcher_foreground.png",
+      "sha256": "711d32e31c459ba64834a9e2e3bf0442ed91ba7f774c9166777561435c9a9bfd",
+      "size": [
+        324,
+        324
+      ]
+    },
+    {
+      "file": "res/mipmap-xxhdpi/ic_launcher_round.png",
+      "sha256": "d7ea2e90782519494697fbd910e2efa9c23cf029e0f28b1424f6abdf3709efe5",
+      "size": [
+        144,
+        144
+      ]
+    },
+    {
+      "file": "res/mipmap-xxxhdpi/ic_launcher.png",
+      "sha256": "e7201a265d988d99219e00661cc9140190fbf237e60734197213344f970a2117",
+      "size": [
+        192,
+        192
+      ]
+    },
+    {
+      "file": "res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+      "sha256": "1163a33f4c776072aa9caa7653ee2fd46c100b9cfd5553a2131a2093003a541d",
+      "size": [
+        432,
+        432
+      ]
+    },
+    {
+      "file": "res/mipmap-xxxhdpi/ic_launcher_round.png",
+      "sha256": "e7201a265d988d99219e00661cc9140190fbf237e60734197213344f970a2117",
+      "size": [
+        192,
+        192
+      ]
+    }
+  ]
+}

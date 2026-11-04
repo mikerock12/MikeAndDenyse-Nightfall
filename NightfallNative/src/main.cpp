@@ -2,6 +2,12 @@
 #include "NightfallNet.h"
 #include "NativeWorldArt.h"
 #include "raylib.h"
+#include "GamePreferences.h"
+#include "MobileServices.h"
+#if defined(PLATFORM_ANDROID)
+extern "C" JNIEXPORT void JNICALL Java_com_mikeanddenyse_nightfall_MainActivity_nativeSetPaused(JNIEnv*,jclass,jboolean paused){SLTMobile::SetBackground(paused);}
+#endif
+#include "rlgl.h"
 #if defined(_WIN32)
 #include "WindowsBranding.h"
 #endif
@@ -26,6 +32,7 @@ extern "C" struct android_app* GetAndroidApp(void);
 namespace
 {
     using namespace Nightfall;
+    SLTPrefs::Preferences* Preferences=nullptr;
 
 #ifdef PLATFORM_ANDROID
     unsigned char* LoadAndroidAsset(const char* name,int* size)
@@ -101,13 +108,14 @@ namespace
         void Play(const std::string& id)
         {
             if (!_ready) return;
+            if(Preferences && Preferences->value.vibration && (id=="hurt"||id=="stomp"))SLTMobile::Call("vibrateCombat");
             double now=GetTime();
             if(_lastPlayed.count(id) && now-_lastPlayed[id]<0.035) return;
             _lastPlayed[id]=now;
             auto it = _sounds.find(id);
             if (it != _sounds.end()) {
                 SetSoundPitch(it->second,0.94f+GetRandomValue(0,120)/1000.0f);
-                SetSoundVolume(it->second,0.85f);
+                SetSoundVolume(it->second,Preferences?Preferences->value.effects:.85f);
                 PlaySound(it->second);
             }
         }
@@ -311,6 +319,7 @@ namespace
     Rectangle Viewport()
     {
         float scale = std::min(GetScreenWidth() / 960.0f, GetScreenHeight() / 540.0f);
+        if(Preferences&&Preferences->value.integerScale&&scale>=1)scale=std::floor(scale);
         return {(GetScreenWidth() - 960.0f * scale) / 2, (GetScreenHeight() - 540.0f * scale) / 2, 960.0f * scale, 540.0f * scale};
     }
 
@@ -345,8 +354,10 @@ namespace
 int main(int argc, char** argv)
 {
     std::string renderSmokeDirectory;
+    std::string settingsSmokeDirectory;
     for (int i = 1; i < argc; ++i)
     {
+        if(std::string(argv[i])=="--settings-smoke" && i+1<argc)settingsSmokeDirectory=argv[++i];
         if(std::string(argv[i])=="--render-smoke" && i+1<argc) renderSmokeDirectory=argv[++i];
         if (std::string(argv[i]) == "--headless-smoke")
         {
@@ -372,13 +383,13 @@ int main(int argc, char** argv)
         }
     }
 
-    SetConfigFlags(renderSmokeDirectory.empty() ? FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT : FLAG_WINDOW_HIDDEN);
+    SetConfigFlags(renderSmokeDirectory.empty() && settingsSmokeDirectory.empty() ? FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT : FLAG_WINDOW_HIDDEN);
 #ifdef PLATFORM_ANDROID
     // Use the actual Android surface size. raylib 5.5's fixed logical window
     // path applies its own framebuffer scale in addition to our 16:9 target.
-    InitWindow(0, 0, "Mike & Denyse: Nightfall (C++20 Native)");
+    InitWindow(0, 0, "Mike & Denyse: Nightfall");
 #else
-    InitWindow(T::ViewW, T::ViewH, "Mike & Denyse: Nightfall (C++20 Native)");
+    InitWindow(T::ViewW, T::ViewH, "Mike & Denyse: Nightfall");
 #endif
 #if defined(_WIN32)
     const auto iconBytes = SLTBranding::ApplicationIconPng();
@@ -386,7 +397,16 @@ int main(int argc, char** argv)
     if (appIcon.data) { SetWindowIcon(appIcon); UnloadImage(appIcon); TraceLog(LOG_INFO, "NIGHTFALL_APP_ICON: embedded icon applied"); }
     else TraceLog(LOG_ERROR, "NIGHTFALL_APP_ICON: embedded icon missing or invalid");
 #endif
-    SetTargetFPS(renderSmokeDirectory.empty()?60:0);
+    std::filesystem::path settingsPath;
+#ifdef PLATFORM_ANDROID
+    settingsPath=std::filesystem::path(GetAndroidApp()->activity->internalDataPath)/"nightfall_preferences.cfg";
+#else
+    const char* prefsData=std::getenv("LOCALAPPDATA");settingsPath=std::filesystem::path(prefsData?prefsData:GetApplicationDirectory())/"SmellsLikeTech/Nightfall/preferences.cfg";
+#endif
+    SLTPrefs::Preferences settings(settingsPath,false);Preferences=&settings;
+    if(!renderSmokeDirectory.empty()){settings.Defaults();settings.value.quality=0;}
+    settings.ApplyWindow(!renderSmokeDirectory.empty()||!settingsSmokeDirectory.empty());
+    if(!renderSmokeDirectory.empty())SetTargetFPS(0);
 
     SetExitKey(KEY_NULL);
 #ifdef PLATFORM_ANDROID
@@ -449,27 +469,31 @@ int main(int argc, char** argv)
 
     Ctl touchCtl{};
 
+    auto readPad=[&](Ctl c,int pad){
+        if (IsGamepadAvailable(pad))
+        {
+            float gy = GetGamepadAxisMovement(pad, GAMEPAD_AXIS_LEFT_Y);
+            float gx = GetGamepadAxisMovement(pad, GAMEPAD_AXIS_LEFT_X);
+            c.L = c.L || gx < -settings.value.deadzone || IsGamepadButtonDown(pad, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+            c.R = c.R || gx > settings.value.deadzone || IsGamepadButtonDown(pad, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+            c.D = c.D || gy > settings.value.deadzone || IsGamepadButtonDown(pad, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
+            c.Jp = c.Jp || IsGamepadButtonPressed(pad, settings.value.buttons[8]);
+            c.Jn = c.Jn || IsGamepadButtonDown(pad, settings.value.buttons[8]);
+            c.Ap = c.Ap || IsGamepadButtonPressed(pad, settings.value.buttons[9]);
+        }
+        return c;
+    };
     sim.ReadCtl = [&](int slot) -> Ctl {
         if (slot == 0)
         {
             Ctl c = touchCtl;
-            c.L = c.L || IsKeyDown(KEY_A) || (!twoPlayersLocal && IsKeyDown(KEY_LEFT));
-            c.R = c.R || IsKeyDown(KEY_D) || (!twoPlayersLocal && IsKeyDown(KEY_RIGHT));
-            c.D = c.D || IsKeyDown(KEY_S) || (!twoPlayersLocal && IsKeyDown(KEY_DOWN));
-            c.Jp = c.Jp || IsKeyPressed(KEY_W) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_K);
-            c.Jn = c.Jn || IsKeyDown(KEY_W) || IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_Z) || IsKeyDown(KEY_K);
-            c.Ap = c.Ap || IsKeyPressed(KEY_J) || IsKeyPressed(KEY_X) || IsKeyPressed(KEY_F) || IsKeyPressed(KEY_ENTER);
-            if (IsGamepadAvailable(0))
-            {
-                float gx = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X);
-                c.L = c.L || gx < -0.35f || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_LEFT);
-                c.R = c.R || gx > 0.35f || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
-                c.D = c.D || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN);
-                c.Jp = c.Jp || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-                c.Jn = c.Jn || IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-                c.Ap = c.Ap || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_LEFT) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
-            }
-            return c;
+            c.L = c.L || settings.Down(0,0);
+            c.R = c.R || settings.Down(0,1);
+            c.D = c.D || settings.Down(0,2);
+            c.Jp = c.Jp || settings.Pressed(0,3);
+            c.Jn = c.Jn || settings.Down(0,3);
+            c.Ap = c.Ap || settings.Pressed(0,4);
+            return readPad(c,0);
         }
         if (lan.IsHosting())
         {
@@ -485,24 +509,30 @@ int main(int argc, char** argv)
             return c;
         }
         Ctl c{};
-        c.L = IsKeyDown(KEY_LEFT);
-        c.R = IsKeyDown(KEY_RIGHT);
-        c.D = IsKeyDown(KEY_DOWN);
-        c.Jp = IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_KP_1);
-        c.Jn = IsKeyDown(KEY_UP) || IsKeyDown(KEY_KP_1);
-        c.Ap = IsKeyPressed(KEY_KP_2) || IsKeyPressed(KEY_RIGHT_CONTROL);
-        return c;
+        c.L = settings.Down(1,0);
+        c.R = settings.Down(1,1);
+        c.D = settings.Down(1,2);
+        c.Jp = settings.Pressed(1,3);
+        c.Jn = settings.Down(1,3);
+        c.Ap = settings.Pressed(1,4);
+        return readPad(c,1);
     };
 
-    RenderTexture2D target = LoadRenderTexture(T::ViewW, T::ViewH);
+    RenderTexture2D target = LoadRenderTexture(T::ViewW*settings.RenderScale(), T::ViewH*settings.RenderScale());
     SetTextureFilter(target.texture, TEXTURE_FILTER_POINT);
+    auto ReadPhysicalCtl=sim.ReadCtl;
+    std::array<Ctl,2> tickControls{}, pendingControls{};
+    sim.ReadCtl=[&](int slot){return tickControls[std::clamp(slot,0,1)];};
     int renderSmokeFrame=0;
+    int settingsSmokeFrame=0;
+    if(!settingsSmokeDirectory.empty())std::filesystem::create_directories(settingsSmokeDirectory);
     if(!renderSmokeDirectory.empty()) {
         std::filesystem::create_directories(renderSmokeDirectory);
         sim.ReadCtl=[](int){return Ctl{};};
         screen=ScreenMode::Playing;sim.Start(0,"mike","denyse",true);
     }
     ScreenMode loggedScreen=ScreenMode::Title;
+    double simulationAccumulator=0;
     bool loggedPause=false;
     TraceLog(LOG_INFO,"NIGHTFALL_SCREEN: 0");
 
@@ -510,31 +540,43 @@ int main(int argc, char** argv)
     {
         float dt = renderSmokeDirectory.empty()?std::min(GetFrameTime(), 1.0f / 20.0f):1.0f/60;
         Rectangle viewport = Viewport();
+        if(!settingsSmokeDirectory.empty())settings.Show(settingsSmokeFrame/2);
+        const bool settingsWasOpen=settings.open;
+        settings.Update();
+        if(settings.changed) {
+            if(settings.windowChanged)settings.ApplyWindow(!renderSmokeDirectory.empty()||!settingsSmokeDirectory.empty());
+            if(target.texture.width!=T::ViewW*settings.RenderScale()){UnloadRenderTexture(target);target=LoadRenderTexture(T::ViewW*settings.RenderScale(),T::ViewH*settings.RenderScale());SetTextureFilter(target.texture,TEXTURE_FILTER_POINT);}
+        }
+        if(IsAudioDeviceReady())SetMasterVolume(SLTMobile::Background?0:settings.value.master);
+        showTouchHud=settings.value.touch;
+        if(settings.open&&screen==ScreenMode::Playing)paused=true;
         int tc = GetTouchPointCount();
         Vector2 pointer = CanvasPoint(tc > 0 ? GetTouchPosition(0) : GetMousePosition(), viewport);
-        bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || (tc > 0 && previousTouches == 0);
+        bool clicked = !settingsWasOpen && !settings.open && (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || (tc > 0 && previousTouches == 0));
         previousTouches = tc;
         auto click = [&](Rectangle rect) { return clicked && CheckCollisionPointRec(pointer, rect); };
-        bool confirm = IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-        bool back = IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACK) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) || click({820, 12, 124, 44});
+        bool confirm = !settingsWasOpen && !settings.open && (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN));
+        bool back = !settingsWasOpen && !settings.open && (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACK) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) || click({820, 12, 124, 44}));
+        if(screen!=ScreenMode::Playing && click({680,480,260,44}))settings.Show();
+        if(screen==ScreenMode::Playing && paused && click({680,145,260,44}))settings.Show();
         auto leaveMatch = [&](ScreenMode dest) {
             lan.Stop(); latestRemoteCtl = {}; touchCtl = {}; paused = false; screen = dest;
         };
-        if (renderSmokeDirectory.empty() && !IsWindowFocused() && screen == ScreenMode::Playing) paused = true;
-        if (IsKeyPressed(KEY_F4)) showTouchHud = !showTouchHud;
+        if (renderSmokeDirectory.empty() && (SLTPrefs::Mobile||settings.value.autoPause) && !IsWindowFocused() && screen == ScreenMode::Playing) paused = true;
+        if (!SLTPrefs::Mobile && !settingsWasOpen && IsKeyPressed(KEY_F4)) {settings.value.touch=!settings.value.touch;settings.Save();}
 
         // All held fingers contribute; jump/attack edges fire once, never every rendered frame.
         touchCtl = Ctl{};
-        if (tc > 0) showTouchHud = true;
-        if (screen == ScreenMode::Playing && !paused && sim.State == "play") {
+        if (SLTPrefs::Mobile)showTouchHud=true;
+        if (screen == ScreenMode::Playing && !paused && !settingsWasOpen && !settings.open && sim.State == "play") {
             int points = tc > 0 ? tc : (IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? 1 : 0);
             for (int i = 0; i < points; ++i) {
-                Vector2 point = CanvasPoint(tc > 0 ? GetTouchPosition(i) : GetMousePosition(), viewport);
-                if (CheckCollisionPointCircle(point, {80,430},58)) touchCtl.L = true;
-                if (CheckCollisionPointCircle(point, {204,430},58)) touchCtl.R = true;
-                if (CheckCollisionPointCircle(point, {131,315},47)) touchCtl.D = true;
-                if (CheckCollisionPointCircle(point, {714,452},56)) touchCtl.Ap = true;
-                if (CheckCollisionPointCircle(point, {862,422},66)) touchCtl.Jn = true;
+                Vector2 point = settings.ControlInput(CanvasPoint(tc > 0 ? GetTouchPosition(i) : GetMousePosition(), viewport),960,540);
+                if (CheckCollisionPointCircle(point, {80,430},58*settings.value.touchSize)) touchCtl.L = true;
+                if (CheckCollisionPointCircle(point, {204,430},58*settings.value.touchSize)) touchCtl.R = true;
+                if (CheckCollisionPointCircle(point, {131,315},47*settings.value.touchSize)) touchCtl.D = true;
+                if (CheckCollisionPointCircle(point, {690,452},56*settings.value.touchSize)) touchCtl.Ap = true;
+                if (CheckCollisionPointCircle(point, {862,422},66*settings.value.touchSize)) touchCtl.Jn = true;
             }
         }
         bool heldAttack = touchCtl.Ap;
@@ -542,6 +584,12 @@ int main(int argc, char** argv)
         touchCtl.Jp = touchCtl.Jn && !previousJump;
         previousAttack = heldAttack; previousJump = touchCtl.Jn;
 
+        for(int slot=0;slot<2;slot++) {
+            Ctl now=ReadPhysicalCtl(slot);
+            now.Jp|=pendingControls[slot].Jp;now.Ap|=pendingControls[slot].Ap;pendingControls[slot]=now;
+        }
+        if(paused||settings.open||settingsWasOpen||screen!=ScreenMode::Playing){pendingControls={};simulationAccumulator=0;}
+        if(!settings.open && !settingsWasOpen) {
         if (screen == ScreenMode::Title) {
             if (confirm || click({300,300,360,52})) { wantLan = false; screen = ScreenMode::HeroSelect; sfx.Play("ui"); }
             else if (click({300,362,360,52})) { wantLan = true; screen = ScreenMode::HeroSelect; sfx.Play("ui"); }
@@ -605,7 +653,7 @@ int main(int argc, char** argv)
         else if (screen == ScreenMode::Playing) {
             if(back || IsKeyPressed(KEY_P) || click({16,10,78,46})) paused=!paused;
             bool terminal=sim.State=="clear" || sim.State=="win" || sim.State=="dead";
-            if (paused || terminal) {
+            if ((paused || terminal) && !settings.open && !settingsWasOpen) {
                 bool owner=!lan.IsConnectedClient();
                 if ((confirm || click({290,285,380,54})) && (paused || owner)) {
                     if(paused) paused=false;
@@ -617,7 +665,7 @@ int main(int argc, char** argv)
             }
             if(!paused && screen==ScreenMode::Playing) {
                 if(lan.IsConnectedClient()) {
-                    Ctl c=sim.ReadCtl(0); lan.SendClientInput({c.L,c.R,c.D,c.Jp,c.Jn,c.Ap});
+                    Ctl c=pendingControls[0];pendingControls[0].Jp=pendingControls[0].Ap=false; lan.SendClientInput({c.L,c.R,c.D,c.Jp,c.Jn,c.Ap});
                     FrameSnap snap; int world=sim.WorldIndex; std::string h,g; bool started=false;
                     bool got=lan.PollClientSnapshot(snap,world,h,g,started);
                     if(!lan.IsConnectedClient()) { leaveMatch(ScreenMode::HeroSelect); }
@@ -629,7 +677,12 @@ int main(int argc, char** argv)
                         lan.TickDiscovery(static_cast<float>(GetTime())); InputMsg input{}; std::string hero;
                         if(lan.PollHostInput(input,hero)) { sim.EnsureSecond(hero); latestRemoteCtl=input; }
                     }
-                    sim.Tick(dt);
+                    simulationAccumulator+=dt;
+                    while(simulationAccumulator+1e-8>=1.0/60.0){
+                        if(lan.IsHosting()) {pendingControls[1].L=latestRemoteCtl.L;pendingControls[1].R=latestRemoteCtl.R;pendingControls[1].D=latestRemoteCtl.D;pendingControls[1].Jn=latestRemoteCtl.Jn;pendingControls[1].Jp|=latestRemoteCtl.Jp;pendingControls[1].Ap|=latestRemoteCtl.Ap;latestRemoteCtl.Jp=latestRemoteCtl.Ap=false;}
+                        tickControls=pendingControls;sim.Tick(1.f/60.f);simulationAccumulator-=1.0/60.0;
+                        for(auto& c:pendingControls)c.Jp=c.Ap=false;
+                    }
                 }
                 if((sim.State=="clear" || sim.State=="win") && !resultSaved && !lan.IsConnectedClient()) {
                     Progress::OnClear(sim.WorldIndex); Progress::RememberRun(sim.Souls,sim.Score,heroP1); resultSaved=true;
@@ -637,6 +690,7 @@ int main(int argc, char** argv)
             }
         }
 
+        }
         if(screen!=loggedScreen) { TraceLog(LOG_INFO,"NIGHTFALL_SCREEN: %d",static_cast<int>(screen));loggedScreen=screen; }
         if(paused!=loggedPause) { TraceLog(LOG_INFO,"NIGHTFALL_PAUSE: %d",paused?1:0);loggedPause=paused; }
         for (auto& fx : visualFx) fx.age += dt;
@@ -659,6 +713,7 @@ int main(int argc, char** argv)
         }
 
         BeginTextureMode(target);
+        rlPushMatrix();rlScalef(static_cast<float>(settings.RenderScale()),static_cast<float>(settings.RenderScale()),1);
         if (screen == ScreenMode::Title)
         {
             ClearBackground(Color{12, 8, 18, 255});
@@ -700,7 +755,7 @@ int main(int argc, char** argv)
             DrawText("COMO ATRAVESSAR A NOITE",190,70,34,GOLD);
             DrawText("Mike: espada e ataque corpo a corpo. Denyse: cristais e queda lenta.",90,145,21,WHITE);
             DrawText("Toque: esquerda / direita / descer, GOLPE, PULO e II para pausar.",90,195,21,WHITE);
-            DrawText("Teclado: A/D andar, W/ESPACO pular, J/X atacar, ESC/P pausar.",90,245,21,WHITE);
+            DrawText(SLTPrefs::Mobile?"Botoes ajustaveis: tamanho, margem, transparencia e modo canhoto.":"Teclas remapeaveis: abra Configuracoes > Controles.",90,245,21,WHITE);
             DrawText("Venca o chefe e toque o sino. As 16 noites abrem em ordem.",90,295,21,WHITE);
             DrawText("Coop: mesma rede Wi-Fi, criar sala e tocar a sala no outro celular.",90,345,21,WHITE);
             DrawText("Controle: direcional, A para pular, X para atacar, B para voltar.",90,395,21,WHITE);
@@ -752,7 +807,7 @@ int main(int argc, char** argv)
             worldArt.Prepare(sim.Level.World,sim.WorldIndex);
             worldArt.DrawSky(sim.CamX,sim.Level.Cols,sprites.Get(sim.Level.World.Id+"_bg"));
 
-            float camX = sim.CamX + (sim.Shake > 0.1f ? std::sin(sim.Time * 60.0f) * sim.Shake * 0.4f : 0.0f);
+            float camX = sim.CamX + (settings.value.shake && sim.Shake > 0.1f ? std::sin(sim.Time * 60.0f) * sim.Shake * 0.4f : 0.0f);
             float camY = sim.CamY;
 
             // Tiles
@@ -902,16 +957,17 @@ int main(int argc, char** argv)
                 DrawText(sim.Message.c_str(), 240, 106, 22, GOLD);
             }
 
-            worldArt.Weather(sim.Level.World.Id,sim.Time);
-            worldArt.Atmosphere();
+            if(settings.value.particles)worldArt.Weather(sim.Level.World.Id,sim.Time);
+            if(settings.value.particles)worldArt.Atmosphere();
             if (showTouchHud) {
-                auto pad=[](Vector2 c,float radius,const char* label,bool held) {
-                    DrawCircleV(c,radius,held ? Color{150,110,60,160}:Color{10,5,18,115});
+                auto pad=[&](Vector2 c,float radius,const char* label,bool held) {
+                    c=settings.ControlPoint(c,960,540);radius*=settings.value.touchSize;
+                    DrawCircleV(c,radius,held ? Color{150,110,60,160}:ColorAlpha(Color{10,5,18,255},settings.value.touchOpacity));
                     DrawCircleLines(static_cast<int>(c.x),static_cast<int>(c.y),radius,GOLD);
                     DrawText(label,static_cast<int>(c.x-MeasureText(label,21)/2),static_cast<int>(c.y-10),21,WHITE);
                 };
                 pad({80,430},58,"<",touchCtl.L); pad({204,430},58,">",touchCtl.R);
-                pad({131,315},47,"v",touchCtl.D); pad({714,452},56,"GOLPE",heldAttack); pad({862,422},66,"PULO",touchCtl.Jn);
+                pad({131,315},47,"v",touchCtl.D); pad({690,452},56,"GOLPE",heldAttack); pad({862,422},66,"PULO",touchCtl.Jn);
             }
             Button({16,10,78,46},"II");
             if(sim.Fade>0) DrawRectangle(0,0,960,540,Fade(BLACK,std::min(1.0f,sim.Fade)));
@@ -924,6 +980,9 @@ int main(int argc, char** argv)
                 Button({290,350,380,54},"Voltar ao mapa"); Button({290,415,380,54},"Menu inicial");
             }
         }
+        if(screen!=ScreenMode::Playing)Button({680,480,260,44},"Configuracoes");
+        else if(paused)Button({680,145,260,44},"Configuracoes");
+        rlDrawRenderBatchActive();rlPopMatrix();
         EndTextureMode();
         if(!renderSmokeDirectory.empty() && ++renderSmokeFrame%180==0) {
             Image image=LoadImageFromTexture(target.texture);ImageFlipVertical(&image);
@@ -945,7 +1004,13 @@ int main(int argc, char** argv)
             0.0f,
             WHITE
         );
+        if(settings.value.brightness<1)DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Fade(BLACK,1-settings.value.brightness));
+        else if(settings.value.brightness>1)DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Fade(WHITE,(settings.value.brightness-1)*.45f));
+        if(settings.value.showFps)DrawFPS(8,GetScreenHeight()-22);
+        settings.Draw();
         EndDrawing();
+        if(!settingsSmokeDirectory.empty() && ++settingsSmokeFrame%2==0){Image capture=LoadImageFromScreen();std::string file=(std::filesystem::path(settingsSmokeDirectory)/("settings-"+std::to_string((settingsSmokeFrame-1)/2)+".png")).string();bool saved=ExportImage(capture,file.c_str());UnloadImage(capture);if(!saved)return 9;if(settingsSmokeFrame>=10)quit=true;}
+
     }
 
     UnloadRenderTexture(target);
