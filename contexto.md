@@ -106,3 +106,11 @@ Candidatos locais compilaram para Windows e Android x86_64; CTest anterior 4/4 R
 
 ### Configuracoes e icones APK — 03/11/2026, em validacao
 Configuracoes de plataforma e touch persistentes, icones Android da arte Windows aprovada, pausa de audio no background e executavel Windows GUI implementados. Simulacao de frontend desacoplada do FPS; P2 aceita segundo gamepad. QA passou a conferir 15 recursos PNG compilados por jogo, dois XML adaptativos, preferencias apos reinicio e gestos reais no emulador. Primeiro CI encontrou falta de carregamento explicito da biblioteca para o JNI de lifecycle no Nightfall e seletor de borda obsoleto no driver RDA; corrigidos, gates serao repetidos. Nao ha nova release ainda. Audio Suno adiado para o fim pelo usuario, sem clips gerados; nao expor ajustes sem audio correspondente. Sem Android fisico/dupla Wi-Fi. Responsavel: Codex.
+
+
+## Superficie Android — 03/11/2026
+
+O gate pos-merge encontrou inicializacao intermitente com a imagem comprimida verticalmente, enquanto as areas de toque permaneciam nas coordenadas esperadas. A inicializacao passa a obter as dimensoes fisicas da janela Android via WindowMetrics/Display antes de InitWindow, evitando dimensoes zero e a orientacao ambigua da raylib. O QA de Nightfall exige o titulo na posicao correta e a abertura real das configuracoes. No RDA, o teste online aguarda o jogo terminar o preload antes de capturar. Nao afrouxar assertions nem atribuir o problema a persistencia sem examinar a imagem. Nightfall prepara1.1.1/code16, preservando release1.1.0; RDA0.4.0 ainda candidato. CI/build/publicacao desta correcao pendentes. Responsavel: Codex.
+
+
+Em 04/11/2026, o log do segundo formato Nightfall comprovou NativeWindow temporaria de1x1, apesar de WindowMetrics1000x600. A raylib5.5 calculava screenScale com esse buffer temporario e mantinha o jogo preto/comprimido. cmake/AndroidSurface.cmake preserva o upstream imutavel (SHA-256 a17a8c75...) e compila apenas uma copia de rcore com ANativeWindow_setBuffersGeometry aplicado antes da consulta inicial de dimensoes. A alteracao e marcada no codigo gerado e no log SLT_BUFFER_GEOMETRY. Validacao em andamento, sem nova publicacao desta manutencao. Responsavel: Codex.

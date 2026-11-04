@@ -15,6 +15,7 @@ import time
 import xml.etree.ElementTree as ET
 import zipfile
 from android_icons import verify as verify_icons
+from PIL import Image
 
 apk = Path(sys.argv[1]).resolve()
 output = Path(sys.argv[2]).resolve()
@@ -91,6 +92,8 @@ else:
     (output/'logcat.txt').write_bytes(adb('logcat','-d'))
     (output/'startup-blocked.png').write_bytes(adb('exec-out','screencap','-p'))
     raise RuntimeError('Native frontend did not finish initialization with all 77 assets')
+geometry=re.findall(r'SLT_BUFFER_GEOMETRY: (\d+) x (\d+) result=(-?\d+)',startup_log)
+assert geometry and int(geometry[-1][0])>1 and int(geometry[-1][1])>1 and geometry[-1][2]=='0', 'Physical buffer geometry was not applied'
 initial_pid=adb('shell','pidof',package).strip()
 assert initial_pid, 'Native game has no process after startup'
 images = []
@@ -116,6 +119,12 @@ def capture(name, expected_screen):
         raise RuntimeError(f'Native game must be landscape, got {width}x{height}')
     path = output / f'{name}.png'
     path.write_bytes(data)
+    if name=='01-title':
+        image=Image.open(path).convert('RGB')
+        scale=min(width/960,height/540);left=(width-960*scale)/2;top=(height-540*scale)/2
+        header=image.crop((round(left+250*scale),round(top+120*scale),round(left+710*scale),round(top+180*scale)))
+        gold=sum(r>130 and g>100 and b<180 for r,g,b in header.getdata())/(header.width*header.height)
+        assert gold>.04, 'Title layout is compressed or displaced relative to touch coordinates'
     images.append({'file': path.name, 'width': width, 'height': height, 'sha256': hashlib.sha256(data).hexdigest()})
 def point(x, y):
     scale = min(width / 960, height / 540)
@@ -128,6 +137,7 @@ def tap(x, y):
     time.sleep(1)
 capture('01-title',0)
 tap(810,502)
+assert "SLT_SETTINGS: opened mobile=1" in adb("logcat","-d","-s","raylib").decode(errors="replace"), "Settings did not open"
 for tab in range(5):
     tap(114+184*tab,108)
     capture(f'settings-{tab}',0)
@@ -138,7 +148,9 @@ tap(852,45)
 adb('shell','am','force-stop',package)
 adb('logcat','-c')
 adb('shell','am','start','-W','-n',f'{package}/{activity}')
-time.sleep(5)
+for attempt in range(30):
+    if 'NIGHTFALL_SCREEN: 0' in adb('logcat','-d','-s','raylib').decode(errors='replace'):break
+    time.sleep(1)
 log=adb('logcat','-d','-s','raylib').decode('utf-8',errors='replace')
 assert re.search(r'SLT_PREFS_LOADED: mobile=1 master=0.80 left=1 size=1.05 deadzone=0.245',log), 'Preferences did not survive restart'
 initial_pid=adb('shell','pidof',package).strip()
@@ -180,6 +192,8 @@ time.sleep(1)
 adb('shell','am','start','-W','-n',f'{package}/{activity}')
 time.sleep(2)
 capture('11-resumed',4)
+pauses=re.findall(r'NIGHTFALL_PAUSE: (\d+)',adb('logcat','-d','-s','raylib').decode(errors='replace'))
+assert pauses and pauses[-1]=='1', 'Background return must retain an explicit pause'
 log = adb('logcat','-d').decode('utf-8',errors='replace')
 (output/'logcat.txt').write_text(log,encoding='utf-8')
 (output/'activity.txt').write_bytes(adb('shell','dumpsys','activity','activities'))
